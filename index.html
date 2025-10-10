@@ -1052,7 +1052,7 @@
       </div>
 
       <div class="discount-section">
-        <label for="discountCode">Discount Code (e.g., LAWAL):</label>
+        <label for="discountCode">Discount Code:</label>
         <input type="text" id="discountCode" class="discount-input" placeholder="Enter code">
         <button class="apply-discount" id="applyDiscount">Apply</button>
       </div>
@@ -1067,7 +1067,7 @@
         <label>Payment Method:</label>
         <div class="payment-options">
           <label class="payment-option">
-            <input type="radio" name="payment" value="whatsapp" checked> WhatsApp Order
+            <input type="radio" name="payment" value="whatsapp" checked> Pay With Cash
           </label>
           <label class="payment-option">
             <input type="radio" name="payment" value="transfer"> Bank Transfer
@@ -1521,15 +1521,18 @@ Sent from PixelStore built by BuildinPixel 🚀`;
       productModal.style.display = 'none';
     });
 
-    // Close modals when clicking outside
-    window.addEventListener('click', (e) => {
-      if (e.target === cartModal) {
-        cartModal.style.display = 'none';
-      }
-      if (e.target === productModal) {
-        productModal.style.display = 'none';
-      }
-    });
+    // Close modals when clicking on the backdrop (outside content)
+window.addEventListener('click', function(e) {
+  // Close cart modal if it's open AND click is directly on the dark overlay (not inside cart content)
+  if (cartModal.style.display === 'flex' && e.target === cartModal) {
+    cartModal.style.display = 'none';
+  }
+  
+  // Close product modal if it's open AND click is directly on the dark overlay
+  if (productModal.style.display === 'flex' && e.target === productModal) {
+    productModal.style.display = 'none';
+  }
+});
 
     // Event Listeners
     floatingCart.addEventListener('click', () => {
