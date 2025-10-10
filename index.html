@@ -207,6 +207,7 @@
       transition: transform 0.3s, box-shadow 0.3s;
       opacity: 0;
       animation: fadeIn 0.6s forwards;
+      cursor: pointer;
     }
 
     .product-card:nth-child(1) { animation-delay: 0.1s; }
@@ -259,24 +260,6 @@
       font-size: 1.4rem;
       color: var(--primary-red);
       margin-bottom: 1.2rem;
-    }
-
-    .add-to-cart {
-      width: 100%;
-      padding: 0.75rem;
-      background: var(--primary-red);
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all 0.25s;
-      font-size: 1.05rem;
-    }
-
-    .add-to-cart:hover {
-      background: var(--hover-red);
-      transform: scale(1.02);
     }
 
     /* About */
@@ -697,6 +680,136 @@
       opacity: 0;
     }
 
+    /* Product Detail Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1100;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-content {
+      background: white;
+      margin: 2rem auto;
+      padding: 2rem;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+      animation: modalFadeIn 0.3s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .close-modal {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.2rem;
+      font-size: 1.8rem;
+      cursor: pointer;
+      color: #718096;
+      transition: color 0.2s;
+    }
+
+    .close-modal:hover {
+      color: var(--primary-red);
+    }
+
+    .modal-img {
+      width: 100%;
+      height: 280px;
+      object-fit: cover;
+      border-radius: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-info h2 {
+      font-size: 1.6rem;
+      margin-bottom: 0.3rem;
+      color: var(--text-dark);
+    }
+
+    .modal-code {
+      color: var(--warm-yellow);
+      font-weight: 600;
+      margin-bottom: 0.8rem;
+      display: block;
+    }
+
+    .modal-desc {
+      color: #555;
+      line-height: 1.6;
+      margin-bottom: 1.2rem;
+    }
+
+    .modal-price {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: var(--primary-red);
+      margin-bottom: 1.5rem;
+    }
+
+    .quantity-selector {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .quantity-btn {
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--border-gray);
+      border-radius: 50%;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .quantity-btn:hover {
+      background: var(--light-cream);
+      border-color: var(--primary-red);
+      color: var(--primary-red);
+    }
+
+    .quantity-display {
+      min-width: 36px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.1rem;
+    }
+
+    .add-to-cart-modal {
+      width: 100%;
+      padding: 0.85rem;
+      background: var(--primary-red);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .add-to-cart-modal:hover {
+      background: var(--hover-red);
+    }
+
     /* Responsive */
     @media (max-width: 768px) {
       .navbar {
@@ -752,7 +865,8 @@
         padding: 3.5rem 1.5rem;
       }
 
-      .cart-content {
+      .cart-content,
+      .modal-content {
         padding: 1.8rem;
         width: 95%;
       }
@@ -920,6 +1034,16 @@
     </div>
   </div>
 
+  <!-- Product Detail Modal -->
+  <div id="productModal" class="modal">
+    <div class="modal-content">
+      <span class="close-modal" id="closeProductModal">&times;</span>
+      <div class="modal-body" id="productModalBody">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+  </div>
+
   <script>
     // Product data with auto-generated codes (PX-001, PX-002, etc.)
     const products = [
@@ -982,6 +1106,14 @@
     const customerPhone = document.getElementById('customerPhone');
     const customerAddress = document.getElementById('customerAddress');
     const successMessage = document.getElementById('successMessage');
+    
+    // Modal elements
+    const productModal = document.getElementById('productModal');
+    const closeProductModal = document.getElementById('closeProductModal');
+    const productModalBody = document.getElementById('productModalBody');
+
+    // Current quantity in modal
+    let modalQuantity = 1;
 
     // Format price
     function formatPrice(amount) {
@@ -1008,14 +1140,13 @@
     // Render products (filtered)
     function renderProducts(filteredProducts = products) {
       productsGrid.innerHTML = filteredProducts.map(product => `
-        <div class="product-card" data-id="${product.id}" data-code="${product.code.toLowerCase()}" data-name="${product.name.toLowerCase()}">
+        <div class="product-card" data-id="${product.id}" onclick="openProductModal(${product.id})">
           <img src="${product.img}" alt="${product.name}" class="product-img">
           <div class="product-info">
             <div class="product-code">${product.code}</div>
             <div class="product-name">${product.name}</div>
             <div class="product-desc">${product.desc}</div>
             <div class="product-price">${formatPrice(product.price)}</div>
-            <button class="add-to-cart" onclick="addToCart(${product.id})">Add to Cart</button>
           </div>
         </div>
       `).join('');
@@ -1045,21 +1176,21 @@
     }
 
     // Add to cart with animation
-    window.addToCart = function(productId) {
+    window.addToCart = function(productId, quantity = 1) {
       const product = products.find(p => p.id === productId);
       const existingItem = cart.find(item => item.id === productId);
 
       if (existingItem) {
-        existingItem.quantity += 1;
+        existingItem.quantity += quantity;
       } else {
-        cart.push({ ...product, quantity: 1 });
+        cart.push({ ...product, quantity });
       }
 
       updateCartCount();
       playAddToCartAnimation(productId);
     };
 
-    // Update quantity
+    // Update quantity in cart
     window.updateQuantity = function(productId, change) {
       const item = cart.find(item => item.id === productId);
       if (!item) return;
@@ -1153,7 +1284,9 @@
 
       const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const deliveryFee = calculateDeliveryFee();
-      const total = subtotal + deliveryFee;
+      const totalBeforeDiscount = subtotal + deliveryFee;
+      const discount = Math.round(totalBeforeDiscount * 0.05);
+      const finalTotal = totalBeforeDiscount - discount;
 
       cartBreakdown.innerHTML = `
         <div class="breakdown-row">
@@ -1166,11 +1299,10 @@
         </div>
         <div class="breakdown-row">
           <span>Discount (5% off):</span>
-          <span>-${formatPrice(Math.round(total * 0.05))}</span>
+          <span>-${formatPrice(discount)}</span>
         </div>
       `;
 
-      const finalTotal = total - Math.round(total * 0.05);
       cartTotal.textContent = `Total: ${formatPrice(finalTotal)}`;
     }
 
@@ -1183,7 +1315,7 @@
       }
     });
 
-    // Generate WhatsApp message (includes product images as links!)
+    // Generate WhatsApp message (NO IMAGES)
     function generateWhatsAppMessage() {
       const deliveryOption = document.querySelector('input[name="delivery"]:checked').value;
       const customerNameValue = customerName.value.trim();
@@ -1208,10 +1340,10 @@
       const discount = Math.round(totalBeforeDiscount * 0.05);
       const finalTotal = totalBeforeDiscount - discount;
 
-      // Include product images as links in WhatsApp message
+      // NO IMAGE LINKS - clean text only
       let itemsText = cart.map(item => 
-        `- ${item.name} (${item.code})\n  Image: ${item.img}\n  Qty: ${item.quantity} × ${formatPrice(item.price)} = ${formatPrice(item.price * item.quantity)}`
-      ).join('\n\n');
+        `- ${item.name} (${item.code}) × ${item.quantity} = ${formatPrice(item.price * item.quantity)}`
+      ).join('\n');
       
       let contactInfo = `👤 Customer: ${customerNameValue}`;
       if (deliveryOption === 'delivery') {
@@ -1231,7 +1363,6 @@
         ? '💳 Payment Method: Bank Transfer\nPlease send payment to:\nAccount Name: BuildinPixel\nAccount Number: 0123456789\nBank: XYZ Bank'
         : '💳 Payment Method: WhatsApp Order';
 
-      // Use discount code: PIXEL5
       const message = `🛍️ *NEW ORDER – PixelStore*
 
 ${contactInfo}
@@ -1262,14 +1393,65 @@ Sent from PixelStore built by BuildinPixel 🚀`;
       }, 3000);
     }
 
-    // Close mobile menu when clicking links
-    document.querySelectorAll('.nav-links a').forEach(link => {
-      link.addEventListener('click', () => {
-        // Mobile menu is already hidden on mobile, but this ensures smooth behavior
-        if (window.innerWidth <= 768) {
-          // No mobile menu to close since it's hidden by CSS, but we ensure smooth scroll
-        }
-      });
+    // Open product detail modal
+    window.openProductModal = function(productId) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+
+      modalQuantity = 1; // reset quantity each time
+
+      productModalBody.innerHTML = `
+        <img src="${product.img}" alt="${product.name}" class="modal-img">
+        <div class="modal-info">
+          <h2>${product.name}</h2>
+          <span class="modal-code">${product.code}</span>
+          <p class="modal-desc">${product.desc}</p>
+          <div class="modal-price">${formatPrice(product.price)}</div>
+          
+          <div class="quantity-selector">
+            <button class="quantity-btn" onclick="changeModalQuantity(-1)">−</button>
+            <span class="quantity-display" id="modalQuantityDisplay">1</span>
+            <button class="quantity-btn" onclick="changeModalQuantity(1)">+</button>
+          </div>
+
+          <button class="add-to-cart-modal" onclick="addToCartFromModal(${product.id})">
+            Add to Cart
+          </button>
+        </div>
+      `;
+
+      productModal.style.display = 'flex';
+    };
+
+    // Change quantity in modal
+    window.changeModalQuantity = function(change) {
+      modalQuantity = Math.max(1, modalQuantity + change);
+      document.getElementById('modalQuantityDisplay').textContent = modalQuantity;
+    };
+
+    // Add to cart from modal
+    window.addToCartFromModal = function(productId) {
+      addToCart(productId, modalQuantity);
+      productModal.style.display = 'none';
+    };
+
+    // Close modals
+    closeCart.addEventListener('click', () => {
+      cartModal.style.display = 'none';
+    });
+
+    closeProductModal.addEventListener('click', () => {
+      productModal.style.display = 'none';
+    });
+
+    // Close modals when clicking outside
+    window.addEventListener('click', (e) => {
+      if (e.target === cartModal) {
+        cartModal.style.display = 'none';
+      }
+      if (e.target === productModal) {
+        productModal.style.display = 'none';
+      }
     });
 
     // Event Listeners
@@ -1285,10 +1467,6 @@ Sent from PixelStore built by BuildinPixel 🚀`;
       cartModal.style.display = 'flex';
     });
 
-    closeCart.addEventListener('click', () => {
-      cartModal.style.display = 'none';
-    });
-
     deliveryOptions.forEach(option => {
       option.addEventListener('change', toggleFields);
     });
@@ -1299,17 +1477,6 @@ Sent from PixelStore built by BuildinPixel 🚀`;
         const url = `https://wa.me/2348075640610?text=${encodeURIComponent(message)}`;
         window.open(url, '_blank');
         showSuccessMessage();
-      }
-    });
-
-    // Initialize
-    renderProducts();
-    updateCartCount();
-
-    // Close modal when clicking outside
-    window.addEventListener('click', (e) => {
-      if (e.target === cartModal) {
-        cartModal.style.display = 'none';
       }
     });
 
@@ -1326,6 +1493,10 @@ Sent from PixelStore built by BuildinPixel 🚀`;
         }
       });
     });
+
+    // Initialize
+    renderProducts();
+    updateCartCount();
   </script>
 </body>
 </html>
