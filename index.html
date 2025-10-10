@@ -94,6 +94,137 @@
       justify-content: center;
     }
 
+    /* Cart Item Styles */
+.cart-item {
+  display: flex;
+  gap: 1.2rem;
+  padding: 1.2rem 0;
+  border-bottom: 1px solid var(--border-gray);
+  align-items: flex-start;
+}
+
+.cart-item img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.cart-item-details {
+  flex: 1;
+}
+
+.cart-item-details > div {
+  margin-bottom: 0.5rem;
+}
+
+.item-price {
+  color: var(--primary-red);
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+
+.size-selector {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.8rem 0;
+}
+
+.size-btn {
+  background: white;
+  border: 1px solid var(--border-gray);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.size-btn:hover {
+  background: var(--light-cream);
+  border-color: var(--primary-red);
+}
+
+.size-btn.active {
+  background: var(--warm-yellow);
+  border-color: var(--primary-red);
+  color: var(--text-dark);
+}
+
+.customization-section {
+  margin: 1rem 0 0.8rem;
+}
+
+.show-options-btn {
+  background: var(--light-cream);
+  border: 1px solid var(--border-gray);
+  border-radius: 8px;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.show-options-btn:hover {
+  background: var(--warm-yellow);
+  border-color: var(--primary-red);
+}
+
+.item-total {
+  text-align: right;
+  font-weight: 600;
+  margin-top: 0.5rem;
+}
+
+.quantity-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+}
+
+.qty-btn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border-gray);
+  border-radius: 50%;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.qty-btn:hover {
+  background: var(--light-cream);
+  border-color: var(--primary-red);
+  color: var(--primary-red);
+}
+
+.qty-display {
+  min-width: 30px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.remove-btn {
+  background: none;
+  border: none;
+  color: var(--primary-red);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  transition: color 0.2s;
+}
+
+.remove-btn:hover {
+  color: var(--hover-red);
+}
+
     /* Search Bar */
     .search-section {
       padding: 0.75rem 2rem;
@@ -1278,6 +1409,45 @@ function calculateDeliveryFee() {
       renderCart();
     };
 
+    // Update item size and price
+window.updateItemSize = function(productId, sizeKey, newSizePrice, sizeLabel) {
+  const item = cart.find(item => item.id === productId);
+  if (!item) return;
+
+  item.selectedSize = sizeKey;
+  item.price = newSizePrice;
+  item.sizeLabel = sizeLabel;
+
+  updateCartCount();
+  renderCart();
+};
+
+// Show options (placeholder — you can expand this later)
+window.showOptions = function(productId) {
+  alert('Customization options will appear here. Coming soon!');
+};
+
+// Add cartIndex to items when adding to cart (to show "Item #1", "Item #2")
+function addToCart(productId, quantity = 1) {
+  const product = products.find(p => p.id === productId);
+  const existingItem = cart.find(item => item.id === productId);
+
+  if (existingItem) {
+    existingItem.quantity += quantity;
+  } else {
+    cart.push({ 
+      ...product, 
+      quantity, 
+      cartIndex: cart.length + 1,
+      selectedSize: 'default',
+      sizeLabel: 'Default'
+    });
+  }
+
+  updateCartCount();
+  playAddToCartAnimation(productId);
+}
+
     // Play animation
     function playAddToCartAnimation(productId) {
       const productCard = document.querySelector(`.product-card[data-id="${productId}"]`);
@@ -1332,21 +1502,58 @@ function calculateDeliveryFee() {
         return;
       }
 
-      cartItems.innerHTML = cart.map(item => `
-        <div class="cart-item">
-          <img src="${item.img}" alt="${item.name}">
-          <div class="cart-item-details">
-            <div><strong>${item.name}</strong> (${item.code})</div>
-            <div>${formatPrice(item.price)} × ${item.quantity} = ${formatPrice(item.price * item.quantity)}</div>
-            <div class="quantity-controls">
-              <button class="quantity-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
-              <span class="quantity-display">${item.quantity}</span>
-              <button class="quantity-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
-            </div>
-            <button class="remove-item" onclick="removeFromCart(${item.id})">Remove</button>
-          </div>
+      <!-- INSIDE renderCart() function, replace the cartItems.innerHTML assignment -->
+cartItems.innerHTML = cart.map(item => {
+  // Default price is item.price, but we'll let size override it
+  const selectedSize = item.selectedSize || 'default';
+  let itemPrice = item.price;
+  
+  if (selectedSize === 'small') itemPrice = 5500;
+  if (selectedSize === 'medium') itemPrice = 8000;
+  if (selectedSize === 'big') itemPrice = 10000;
+
+  return `
+    <div class="cart-item">
+      <img src="${item.img}" alt="${item.name}">
+      <div class="cart-item-details">
+        <div><strong>${item.name}</strong> <span>(Item #${item.cartIndex})</span></div>
+        <div class="item-price">${formatPrice(itemPrice)} <span>(${item.sizeLabel || 'Default'})</span></div>
+        
+        <div class="size-selector">
+          <label>Size for this item</label>
+          <button class="size-btn ${selectedSize === 'small' ? 'active' : ''}" 
+                  onclick="updateItemSize(${item.id}, 'small', 5500, 'Small cup')">
+            Small cup - ₦5,500
+          </button>
+          <button class="size-btn ${selectedSize === 'medium' ? 'active' : ''}" 
+                  onclick="updateItemSize(${item.id}, 'medium', 8000, 'Medium cup')">
+            Medium cup - ₦8,000
+          </button>
+          <button class="size-btn ${selectedSize === 'big' ? 'active' : ''}" 
+                  onclick="updateItemSize(${item.id}, 'big', 10000, 'Big cup')">
+            Big cup - ₦10,000
+          </button>
         </div>
-      `).join('');
+
+        <div class="customization-section">
+          <label>Customize this specific item</label>
+          <button class="show-options-btn" onclick="showOptions(${item.id})">⚙️ Show Options</button>
+        </div>
+
+        <div class="item-total">
+          <span>₦${formatPrice(itemPrice * item.quantity)}</span>
+        </div>
+
+        <div class="quantity-controls">
+          <button class="qty-btn" onclick="updateQuantity(${item.id}, -1)">−</button>
+          <span class="qty-display">${item.quantity}</span>
+          <button class="qty-btn" onclick="updateQuantity(${item.id}, 1)">+</button>
+          <button class="remove-btn" onclick="removeFromCart(${item.id})">🗑️</button>
+        </div>
+      </div>
+    </div>
+  `;
+}).join('');
 
       const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const deliveryFee = calculateDeliveryFee();
