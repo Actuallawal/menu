@@ -1521,18 +1521,15 @@ Sent from PixelStore built by BuildinPixel 🚀`;
       productModal.style.display = 'none';
     });
 
-    // Close modals when clicking outside their content
-window.addEventListener('click', (e) => {
-  // Close cart modal if click is outside cart content
-  if (cartModal.style.display === 'flex' && !cartModal.contains(e.target)) {
-    cartModal.style.display = 'none';
-  }
-  
-  // Close product modal if click is outside product modal content
-  if (productModal.style.display === 'flex' && !productModal.contains(e.target)) {
-    productModal.style.display = 'none';
-  }
-});
+    // Close modals when clicking outside
+    window.addEventListener('click', (e) => {
+      if (e.target === cartModal) {
+        cartModal.style.display = 'none';
+      }
+      if (e.target === productModal) {
+        productModal.style.display = 'none';
+      }
+    });
 
     // Event Listeners
     floatingCart.addEventListener('click', () => {
