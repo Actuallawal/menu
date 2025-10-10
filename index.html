@@ -1182,9 +1182,9 @@ function calculateDeliveryFee() {
   if (totalItems === 0) return 0;
 
   // Base fee: ₦1,600
-  // Each additional item adds 15% of base fee (₦240 per extra item)
+  // Each additional item adds 20% of base fee (₦320 per extra item)
   const additionalItems = Math.max(0, totalItems - 1);
-  const additionalFee = 1600 * 0.15 * additionalItems;
+  const additionalFee = 1600 * 0.2 * additionalItems;
   return Math.round(1600 + additionalFee);
 }
 
