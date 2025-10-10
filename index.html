@@ -1173,19 +1173,20 @@
       }).format(amount);
     }
 
-    // Calculate delivery fee (starts at ₦1,600)
-    function calculateDeliveryFee() {
-      const deliveryOption = document.querySelector('input[name="delivery"]:checked')?.value || 'delivery';
-      if (deliveryOption === 'pickup') return 0;
+    // Calculate delivery fee: ₦1,600 for first item, +20% per additional item
+function calculateDeliveryFee() {
+  const deliveryOption = document.querySelector('input[name="delivery"]:checked')?.value || 'delivery';
+  if (deliveryOption === 'pickup') return 0;
 
-      const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-      if (totalItems === 0) return 0;
-      
-      // Base fee: ₦1,600
-      const additionalItems = Math.max(0, totalItems - 1);
-      const additionalFee = 1600 * (0.013 * additionalItems);
-      return Math.round(1600 + additionalFee);
-    }
+  const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+  if (totalItems === 0) return 0;
+
+  // Base fee: ₦1,600
+  // Each additional item adds 15% of base fee (₦240 per extra item)
+  const additionalItems = Math.max(0, totalItems - 1);
+  const additionalFee = 1600 * 0.15 * additionalItems;
+  return Math.round(1600 + additionalFee);
+}
 
     // Apply discount
     function applyDiscount() {
@@ -1388,55 +1389,78 @@
       if (e.key === 'Enter') applyDiscount();
     });
 
-    // Generate WhatsApp message (MINIMAL)
-    function generateWhatsAppMessage() {
-      const deliveryOption = document.querySelector('input[name="delivery"]:checked').value;
-      const customerNameValue = customerName.value.trim();
-      const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-      
-      if (!customerNameValue) {
-        alert('Please enter your name.');
-        return null;
-      }
+    // Generate WhatsApp message
+function generateWhatsAppMessage() {
+  const deliveryOption = document.querySelector('input[name="delivery"]:checked').value;
+  const customerNameValue = customerName.value.trim();
+  
+  if (!customerNameValue) {
+    alert('Please enter your name.');
+    return null;
+  }
 
-      if (deliveryOption === 'delivery') {
-        const phone = customerPhone.value.trim();
-        const address = customerAddress.value.trim();
-        if (!phone || !address) {
-          alert('Please fill in your phone number and delivery address.');
-          return null;
-        }
-      }
-
-      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      const deliveryFee = calculateDeliveryFee();
-      const totalBeforeDiscount = subtotal + deliveryFee;
-      const discount = discountApplied ? Math.round(totalBeforeDiscount * 0.05) : 0;
-      const finalTotal = totalBeforeDiscount - discount;
-
-      let itemsText = cart.map(item => 
-        `${item.name} (${item.code}) x${item.quantity}`
-      ).join(', ');
-
-      let deliveryInfo = deliveryOption === 'pickup' 
-        ? 'Self Pickup' 
-        : `Delivery to: ${customerAddress.value.trim()}`;
-
-      let paymentInstruction = paymentMethod === 'transfer' 
-        ? '\n\nPlease send payment and receipt to this number.' 
-        : '';
-
-      const message = `*NEW ORDER*
-
-Name: ${customerNameValue}
-Items: ${itemsText}
-${deliveryInfo}
-Total: ${formatPrice(finalTotal)}${paymentInstruction}
-
-Code: ${discountApplied ? 'LAWAL' : 'None'}`;
-
-      return message;
+  if (deliveryOption === 'delivery') {
+    const phone = customerPhone.value.trim();
+    const address = customerAddress.value.trim();
+    if (!phone || !address) {
+      alert('Please fill in your phone number and delivery address.');
+      return null;
     }
+  }
+
+  const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const deliveryFee = calculateDeliveryFee();
+  const totalBeforeDiscount = subtotal + deliveryFee;
+  const discount = discountApplied ? Math.round(totalBeforeDiscount * 0.05) : 0;
+  const finalTotal = totalBeforeDiscount - discount;
+
+  // Items list with code and quantity
+  let itemsText = cart.map(item => 
+    `- ${item.name} (${item.code}) × ${item.quantity} = ${formatPrice(item.price * item.quantity)}`
+  ).join('\n');
+
+  let contactInfo = `👤 Customer: ${customerNameValue}`;
+  if (deliveryOption === 'delivery') {
+    contactInfo += `\n📞 Phone: ${customerPhone.value.trim()}`;
+  }
+
+  let deliveryInfo = '';
+  if (deliveryOption === 'pickup') {
+    const pickupTime = document.getElementById('pickupTime').value.trim();
+    deliveryInfo = `📦 Pickup Order${pickupTime ? `\n⏰ Pickup Time: ${pickupTime}` : ''}`;
+  } else {
+    deliveryInfo = `🚚 Delivery: ${formatPrice(deliveryFee)}\n📍 Address: ${customerAddress.value.trim()}`;
+  }
+
+  const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
+  let paymentNote = '';
+  if (paymentMethod === 'transfer') {
+    paymentNote = '\n💳 Please send payment to:\nAccount Name: BuildinPixel\nAccount Number: 0123456789\nBank: XYZ Bank\n\n✅ Kindly send payment receipt after transfer.';
+  } else {
+    paymentNote = '\n💳 Payment Method: WhatsApp Order';
+  }
+
+  const message = `🛍️ *NEW ORDER – PixelStore*
+
+${contactInfo}
+
+🧾 ITEMS:
+${itemsText}
+
+💰 Subtotal: ${formatPrice(subtotal)}
+${deliveryInfo}
+💰 Total before discount: ${formatPrice(totalBeforeDiscount)}
+${discountApplied ? `🎁 Discount (Code: LAWAL): -${formatPrice(discount)}\n` : ''}
+💰 FINAL TOTAL: ${formatPrice(finalTotal)}
+
+${paymentNote}
+
+*Note: Use product codes (e.g., PX-001) to locate items quickly.*
+
+Sent from PixelStore built by BuildinPixel 🚀`;
+
+  return message;
+}
 
     // Show success message
     function showSuccessMessage() {
