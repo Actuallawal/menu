@@ -262,6 +262,24 @@
       margin-bottom: 1.2rem;
     }
 
+    .add-to-cart-card {
+      width: 100%;
+      padding: 0.75rem;
+      background: var(--primary-red);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.25s;
+      font-size: 1.05rem;
+    }
+
+    .add-to-cart-card:hover {
+      background: var(--hover-red);
+      transform: scale(1.02);
+    }
+
     /* About */
     .about-section {
       padding: 5rem 2rem;
@@ -324,6 +342,7 @@
 
     .social-icons img {
       transition: transform 0.2s;
+      filter: invert(1);
     }
 
     .social-icons img:hover {
@@ -485,6 +504,26 @@
       justify-content: space-between;
       margin-bottom: 0.7rem;
       font-size: 1.05rem;
+    }
+
+    .discount-input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-gray);
+      border-radius: 8px;
+      margin: 0.8rem 0 1.2rem;
+      font-size: 1rem;
+    }
+
+    .apply-discount {
+      background: var(--warm-yellow);
+      color: var(--text-dark);
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-bottom: 1rem;
     }
 
     .cart-total {
@@ -999,7 +1038,7 @@
         <label>Delivery Option:</label>
         <div class="delivery-radio-group">
           <label class="delivery-option">
-            <input type="radio" name="delivery" value="delivery" checked> Delivery (₦1,000+)
+            <input type="radio" name="delivery" value="delivery" checked> Delivery (₦1,600+)
           </label>
           <label class="delivery-option">
             <input type="radio" name="delivery" value="pickup"> Self Pickup
@@ -1010,6 +1049,12 @@
           <label for="pickupTime">Preferred Pickup Time:</label>
           <input type="text" id="pickupTime" placeholder="e.g., Tomorrow 3 PM">
         </div>
+      </div>
+
+      <div class="discount-section">
+        <label for="discountCode">Discount Code (e.g., LAWAL):</label>
+        <input type="text" id="discountCode" class="discount-input" placeholder="Enter code">
+        <button class="apply-discount" id="applyDiscount">Apply</button>
       </div>
 
       <div class="cart-breakdown" id="cartBreakdown">
@@ -1083,6 +1128,8 @@
 
     // Cart state
     let cart = JSON.parse(localStorage.getItem('cart')) || [];
+    let discountApplied = false;
+    const DISCOUNT_CODE = "LAWAL";
 
     // DOM Elements
     const productsGrid = document.getElementById('productsGrid');
@@ -1106,6 +1153,8 @@
     const customerPhone = document.getElementById('customerPhone');
     const customerAddress = document.getElementById('customerAddress');
     const successMessage = document.getElementById('successMessage');
+    const discountCodeInput = document.getElementById('discountCode');
+    const applyDiscountBtn = document.getElementById('applyDiscount');
     
     // Modal elements
     const productModal = document.getElementById('productModal');
@@ -1124,7 +1173,7 @@
       }).format(amount);
     }
 
-    // Calculate delivery fee
+    // Calculate delivery fee (starts at ₦1,600)
     function calculateDeliveryFee() {
       const deliveryOption = document.querySelector('input[name="delivery"]:checked')?.value || 'delivery';
       if (deliveryOption === 'pickup') return 0;
@@ -1132,9 +1181,24 @@
       const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
       if (totalItems === 0) return 0;
       
+      // Base fee: ₦1,600
       const additionalItems = Math.max(0, totalItems - 1);
-      const additionalFee = 1000 * (0.013 * additionalItems);
-      return Math.round(1000 + additionalFee);
+      const additionalFee = 1600 * (0.013 * additionalItems);
+      return Math.round(1600 + additionalFee);
+    }
+
+    // Apply discount
+    function applyDiscount() {
+      const code = discountCodeInput.value.trim().toUpperCase();
+      if (code === DISCOUNT_CODE) {
+        discountApplied = true;
+        renderCart();
+        alert('Discount applied! 5% off your order.');
+      } else {
+        discountApplied = false;
+        renderCart();
+        if (code) alert('Invalid discount code. Try "LAWAL".');
+      }
     }
 
     // Render products (filtered)
@@ -1147,6 +1211,7 @@
             <div class="product-name">${product.name}</div>
             <div class="product-desc">${product.desc}</div>
             <div class="product-price">${formatPrice(product.price)}</div>
+            <button class="add-to-cart-card" onclick="event.stopPropagation(); addToCart(${product.id})">Add to Cart</button>
           </div>
         </div>
       `).join('');
@@ -1285,7 +1350,7 @@
       const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const deliveryFee = calculateDeliveryFee();
       const totalBeforeDiscount = subtotal + deliveryFee;
-      const discount = Math.round(totalBeforeDiscount * 0.05);
+      const discount = discountApplied ? Math.round(totalBeforeDiscount * 0.05) : 0;
       const finalTotal = totalBeforeDiscount - discount;
 
       cartBreakdown.innerHTML = `
@@ -1297,10 +1362,10 @@
           <span>Delivery Fee:</span>
           <span>${formatPrice(deliveryFee)}</span>
         </div>
-        <div class="breakdown-row">
-          <span>Discount (5% off):</span>
+        ${discountApplied ? `<div class="breakdown-row">
+          <span>Discount (5%):</span>
           <span>-${formatPrice(discount)}</span>
-        </div>
+        </div>` : ''}
       `;
 
       cartTotal.textContent = `Total: ${formatPrice(finalTotal)}`;
@@ -1310,15 +1375,24 @@
     clearCartBtn.addEventListener('click', () => {
       if (cart.length > 0 && confirm('Are you sure you want to clear your cart?')) {
         cart = [];
+        discountApplied = false;
+        discountCodeInput.value = '';
         updateCartCount();
         renderCart();
       }
     });
 
-    // Generate WhatsApp message (NO IMAGES)
+    // Apply discount button
+    applyDiscountBtn.addEventListener('click', applyDiscount);
+    discountCodeInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') applyDiscount();
+    });
+
+    // Generate WhatsApp message (MINIMAL)
     function generateWhatsAppMessage() {
       const deliveryOption = document.querySelector('input[name="delivery"]:checked').value;
       const customerNameValue = customerName.value.trim();
+      const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
       
       if (!customerNameValue) {
         alert('Please enter your name.');
@@ -1337,50 +1411,29 @@
       const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
       const deliveryFee = calculateDeliveryFee();
       const totalBeforeDiscount = subtotal + deliveryFee;
-      const discount = Math.round(totalBeforeDiscount * 0.05);
+      const discount = discountApplied ? Math.round(totalBeforeDiscount * 0.05) : 0;
       const finalTotal = totalBeforeDiscount - discount;
 
-      // NO IMAGE LINKS - clean text only
       let itemsText = cart.map(item => 
-        `- ${item.name} (${item.code}) × ${item.quantity} = ${formatPrice(item.price * item.quantity)}`
-      ).join('\n');
-      
-      let contactInfo = `👤 Customer: ${customerNameValue}`;
-      if (deliveryOption === 'delivery') {
-        contactInfo += `\n📞 Phone: ${customerPhone.value.trim()}`;
-      }
+        `${item.name} (${item.code}) x${item.quantity}`
+      ).join(', ');
 
-      let deliveryInfo = '';
-      if (deliveryOption === 'pickup') {
-        const pickupTime = document.getElementById('pickupTime').value.trim();
-        deliveryInfo = `📦 Pickup Order${pickupTime ? `\n⏰ Pickup Time: ${pickupTime}` : ''}`;
-      } else {
-        deliveryInfo = `🚚 Delivery: ${formatPrice(deliveryFee)}\n📍 Address: ${customerAddress.value.trim()}`;
-      }
+      let deliveryInfo = deliveryOption === 'pickup' 
+        ? 'Self Pickup' 
+        : `Delivery to: ${customerAddress.value.trim()}`;
 
-      const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
-      let paymentNote = paymentMethod === 'transfer' 
-        ? '💳 Payment Method: Bank Transfer\nPlease send payment to:\nAccount Name: BuildinPixel\nAccount Number: 0123456789\nBank: XYZ Bank'
-        : '💳 Payment Method: WhatsApp Order';
+      let paymentInstruction = paymentMethod === 'transfer' 
+        ? '\n\nPlease send payment and receipt to this number.' 
+        : '';
 
-      const message = `🛍️ *NEW ORDER – PixelStore*
+      const message = `*NEW ORDER*
 
-${contactInfo}
-
-🧾 ITEMS:
-${itemsText}
-
-💰 Subtotal: ${formatPrice(subtotal)}
+Name: ${customerNameValue}
+Items: ${itemsText}
 ${deliveryInfo}
-💰 Total before discount: ${formatPrice(totalBeforeDiscount)}
-🎁 Discount (Use code: PIXEL5): -${formatPrice(discount)}
-💰 FINAL TOTAL: ${formatPrice(finalTotal)}
+Total: ${formatPrice(finalTotal)}${paymentInstruction}
 
-${paymentNote}
-
-*Note: Use product codes (e.g., PX-001) to locate items quickly.*
-
-Sent from PixelStore built by BuildinPixel 🚀`;
+Code: ${discountApplied ? 'LAWAL' : 'None'}`;
 
       return message;
     }
@@ -1398,7 +1451,7 @@ Sent from PixelStore built by BuildinPixel 🚀`;
       const product = products.find(p => p.id === productId);
       if (!product) return;
 
-      modalQuantity = 1; // reset quantity each time
+      modalQuantity = 1;
 
       productModalBody.innerHTML = `
         <img src="${product.img}" alt="${product.name}" class="modal-img">
