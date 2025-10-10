@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <meta name="description" content="Order fresh meals and checkout instantly on WhatsApp 🍔👇 PixelStore delivers fast, delicious food with easy WhatsApp ordering.">
+  <meta name="description" content="Order fresh meals🍝, instant WhatsApp Checkout. Fast Delivery🏍️ Pick Up Available.">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛒</text></svg>">
   <title>PixelStore – Food Delivery</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -947,8 +947,8 @@
 
   <!-- Hero -->
   <section id="home" class="hero">
-    <h1>Order Fresh Meals & Checkout Instantly on WhatsApp 🍔</h1>
-    <p>Experience modern, mobile-first food delivery — built in 2 days by BuildinPixel.</p>
+    <h1>Order fresh meals🍝</h1>
+    <p>Instant WhatsApp Checkout | Fast Delivery🏍️ | Pick-Ups Available 🚶‍➡️.</p>
     <div class="hero-buttons">
       <a href="#products" class="btn btn-outline">🛒 Start Shopping</a>
       <a href="https://wa.me/2348075640610" target="_blank" class="btn btn-primary">💬 Chat on WhatsApp</a>
@@ -1013,7 +1013,7 @@
         <span class="close-cart" id="closeCart">&times;</span>
       </div>
       <div class="cart-actions">
-        <button class="clear-cart" id="clearCart">Clear Cart</button>
+        <button class="clear-cart" id="clearCart">🗑️</button>
       </div>
       <div class="cart-items" id="cartItems">
         <!-- Cart items will be injected -->
@@ -1030,7 +1030,7 @@
 
         <div id="addressField">
           <label for="customerAddress">Delivery Address *</label>
-          <textarea id="customerAddress" placeholder="Enter your full address" rows="2"></textarea>
+          <textarea id="customerAddress" placeholder="e.g., 12, Ability Str., WaterBoard" rows="2"></textarea>
         </div>
       </div>
 
@@ -1038,10 +1038,10 @@
         <label>Delivery Option:</label>
         <div class="delivery-radio-group">
           <label class="delivery-option">
-            <input type="radio" name="delivery" value="delivery" checked> Delivery (₦1,600+)
+            <input type="radio" name="delivery" value="delivery" checked> 🏠 Delivery
           </label>
           <label class="delivery-option">
-            <input type="radio" name="delivery" value="pickup"> Self Pickup
+            <input type="radio" name="delivery" value="pickup"> 🚶 Pickup
           </label>
         </div>
 
@@ -1052,7 +1052,7 @@
       </div>
 
       <div class="discount-section">
-        <label for="discountCode">Discount Code:</label>
+        <label for="discountCode">Discount Code (Optional):</label>
         <input type="text" id="discountCode" class="discount-input" placeholder="Enter code">
         <button class="apply-discount" id="applyDiscount">Apply</button>
       </div>
@@ -1198,7 +1198,7 @@ function calculateDeliveryFee() {
       } else {
         discountApplied = false;
         renderCart();
-        if (code) alert('Invalid discount code. Try "LAWAL".');
+        if (code) alert('Invalid discount code. Try again');
       }
     }
 
@@ -1285,7 +1285,7 @@ function calculateDeliveryFee() {
       
       const fly = document.createElement('div');
       fly.className = 'fly-to-cart';
-      fly.textContent = '🛒';
+      fly.textContent = '🍝';
       fly.style.left = rect.left + rect.width / 2 + 'px';
       fly.style.top = rect.top + rect.height / 2 + 'px';
       document.body.appendChild(fly);
@@ -1435,9 +1435,9 @@ function generateWhatsAppMessage() {
   const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
   let paymentNote = '';
   if (paymentMethod === 'transfer') {
-    paymentNote = '\n💳 Please send payment to:\nAccount Name: BuildinPixel\nAccount Number: 0123456789\nBank: XYZ Bank\n\n✅ Kindly send payment receipt after transfer.';
+    paymentNote = '\n💳 Please send payment to:\nAccount Name: BuildinPixel\nAccount Number: 0123456789\nBank: XYZ Bank\n\n✅ Kindly send payment receipt after transfer. Thank You🙂';
   } else {
-    paymentNote = '\n💳 Payment Method: WhatsApp Order';
+    paymentNote = '\n💳 Payment Method: Pay With Cash';
   }
 
   const message = `🛍️ *NEW ORDER – PixelStore*
@@ -1457,7 +1457,7 @@ ${paymentNote}
 
 *Note: Use product codes (e.g., PX-001) to locate items quickly.*
 
-Sent from PixelStore built by BuildinPixel 🚀`;
+Sent from PixelStore built🍝`;
 
   return message;
 }
