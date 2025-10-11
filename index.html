@@ -1017,58 +1017,89 @@
 }
     /* Responsive */
     @media (max-width: 768px) {
-      .navbar {
-        padding: 1rem;
-      }
-      .nav-links {
-        display: none;
-      }
-      .search-section {
-        padding: 0.75rem 1rem;
-      }
-      #searchInput {
-        max-width: none;
-      }
-      .hero {
-        padding: 4rem 1.5rem 3rem;
-      }
-      .hero h1 {
-        font-size: 2.2rem;
-      }
-      .hero p {
-        font-size: 1.05rem;
-        margin-bottom: 2rem;
-      }
-      .hero-buttons {
-        gap: 1rem;
-      }
-      .btn {
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
-        width: 100%;
-        max-width: 280px;
-      }
-      .products-section {
-        padding: 3rem 1.5rem;
-      }
-      .products-grid {
-        gap: 1.8rem;
-        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-      }
-      .about-section {
-        padding: 3.5rem 1.5rem;
-      }
-      .cart-content,
-      .modal-content {
-        padding: 1.8rem;
-        width: 95%;
-      }
-      .payment-options,
-      .delivery-radio-group {
-        flex-direction: column;
-        gap: 0.8rem;
-      }
-    }
+  .navbar {
+    padding: 1rem;
+  }
+  .nav-links {
+    display: none;
+  }
+  .search-section {
+    padding: 0.75rem 1rem;
+  }
+  #searchInput {
+    max-width: none;
+  }
+  .hero {
+    padding: 3rem 1.2rem 2rem;
+  }
+  .hero h1 {
+    font-size: 1.8rem;
+  }
+  .hero p {
+    font-size: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .hero-buttons {
+    gap: 0.8rem;
+  }
+  .btn {
+    padding: 0.65rem 1.2rem;
+    font-size: 0.95rem;
+    width: auto;
+    max-width: 180px;
+  }
+  .products-section {
+    padding: 2rem 1rem 2.5rem;
+  }
+  /* ✅ CRITICAL: Make cards smaller on mobile */
+  .products-grid {
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); /* Show 3-4 items */
+    padding: 0 0.5rem;
+  }
+  .product-card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  .product-img {
+    height: 140px; /* Reduced from 220px */
+    object-fit: cover;
+  }
+  .product-info {
+    padding: 0.8rem 0.6rem; /* Tighter padding */
+  }
+  .product-name {
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
+  }
+  .product-desc {
+    font-size: 0.85rem;
+    margin-bottom: 0.8rem;
+    -webkit-line-clamp: 2; /* Keep 2 lines */
+  }
+  .product-price {
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+  }
+  .add-to-cart-card {
+    padding: 0.55rem;
+    font-size: 0.95rem;
+  }
+  .about-section {
+    padding: 2.5rem 1.2rem;
+    font-size: 0.95rem;
+  }
+  .cart-content,
+  .modal-content {
+    padding: 1.5rem;
+    width: 95%;
+  }
+  .payment-options,
+  .delivery-radio-group {
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+}
   </style>
 </head>
 <body>
@@ -1476,17 +1507,31 @@ function renderProducts(filteredProducts = products) {
 window.addToCart = function(productId, quantity = 1, sizeKey = null) {
   const product = products.find(p => p.id === productId);
   if (!product) return;
-  // Determine price and label based on size
+
   let finalPrice = product.price;
   let sizeLabel = "Default";
-  if (product.sizes && sizeKey && product.sizes[sizeKey]) {
+  let selectedSize = sizeKey;
+
+  // If product has sizes and no size was explicitly selected
+  if (product.sizes && !sizeKey) {
+    const sizeKeys = Object.keys(product.sizes);
+    // Auto-select the MIDDLE size (e.g., index 1 for 3 options)
+    const middleIndex = Math.floor(sizeKeys.length / 2);
+    selectedSize = sizeKeys[middleIndex];
+    finalPrice = product.sizes[selectedSize].price;
+    sizeLabel = product.sizes[selectedSize].label;
+  }
+  // If a size was explicitly passed, use it
+  else if (product.sizes && sizeKey && product.sizes[sizeKey]) {
     finalPrice = product.sizes[sizeKey].price;
     sizeLabel = product.sizes[sizeKey].label;
   }
+
   const existingItem = cart.find(item => 
     item.id === productId && 
-    item.selectedSize === sizeKey
+    item.selectedSize === selectedSize
   );
+
   if (existingItem) {
     existingItem.quantity += quantity;
   } else {
@@ -1494,11 +1539,12 @@ window.addToCart = function(productId, quantity = 1, sizeKey = null) {
       ...product,
       quantity,
       cartIndex: cart.length + 1,
-      selectedSize: sizeKey,
+      selectedSize: selectedSize,
       sizeLabel: sizeLabel,
-      price: finalPrice // override with size price
+      price: finalPrice
     });
   }
+
   updateCartCount();
   playAddToCartAnimation(productId);
 };
@@ -1529,10 +1575,6 @@ window.updateItemSize = function(productId, sizeKey) {
   item.sizeLabel = sizeInfo.label;
   // Note: Price is dynamically fetched from product.sizes in renderCart()
   renderCart();
-};
-// Show options (placeholder — you can expand this later)
-window.showOptions = function(productId) {
-  alert('Customization options will appear here. Coming soon!');
 };
     // Play animation
     function playAddToCartAnimation(productId) {
@@ -1612,10 +1654,7 @@ function renderCart() {
               `).join('')}
             </div>
           ` : ''}
-          <div class="customization-section">
-            <label>Customize this item</label>
-            <button class="show-options-btn" onclick="showOptions(${item.id})">⚙️ Options</button>
-          </div>
+          
           <div class="item-total">
             <span>Total: ${formatPrice(sizeInfo.price * item.quantity)}</span>
           </div>
@@ -1627,6 +1666,7 @@ function renderCart() {
           </div>
         </div>
       </div>
+      
     `;
   }).join('');
   const subtotal = cart.reduce((sum, item) => {
@@ -1699,37 +1739,74 @@ function generateWhatsAppMessage() {
       return null;
     }
   }
+
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const deliveryFee = calculateDeliveryFee();
   const totalBeforeDiscount = subtotal + deliveryFee;
   const discount = discountApplied ? Math.round(totalBeforeDiscount * 0.05) : 0;
   const finalTotal = totalBeforeDiscount - discount;
-  let itemsText = cart.map(item => 
-    `- ${item.name} (${item.code}) × ${item.quantity} = ${formatPrice(item.price * item.quantity)}`
-  ).join('\n');
-  let contactInfo = `👤 Customer: ${customerNameValue}`;
+
+  // ✅ Updated: Include size and better formatting
+  let itemsText = cart.map(item => {
+    const sizeLabel = item.sizeLabel || 'Default';
+    return `- *${item.name}* (${item.code})
+   Size: ${sizeLabel}
+   Qty: ${item.quantity}
+   Total: ${formatPrice(item.price * item.quantity)}`;
+  }).join('\n\n'); // Double line break between items
+
+  let contactInfo = `👤 *Customer:* ${customerNameValue}`;
   if (deliveryOption === 'delivery') {
-    contactInfo += `\n📞 Phone: ${customerPhone.value.trim()}`;
+    contactInfo += `\n📞 *Phone:* ${customerPhone.value.trim()}`;
   }
+
   let deliveryInfo = '';
-  // Use the same deliveryOption from above — NO duplicate declaration
   if (deliveryOption === 'pickup') {
     const pickupTime = document.getElementById('pickupTime')?.value.trim();
-    deliveryInfo = `📦 Pickup Order${pickupTime ? `\n⏰ Pickup Time: ${pickupTime}` : ''}`;
+    deliveryInfo = `📦 *Pickup Order*
+${pickupTime ? `⏰ *Pickup Time:* ${pickupTime}` : ''}`;
   } else if (deliveryOption === 'dinein') {
     const tableNumber = document.getElementById('tableNumber')?.value.trim();
-    deliveryInfo = `🍽️ Dine-In Order\n📍 Table: ${tableNumber || 'Not specified'}`;
+    deliveryInfo = `🍽️ *Dine-In Order*
+📍 *Table:* ${tableNumber || 'Not specified'}`;
   } else {
-    deliveryInfo = `🚚 Delivery: ${formatPrice(deliveryFee)}\n📍 Address: ${customerAddress.value.trim()}`;
+    deliveryInfo = `🚚 *Delivery*
+📍 *Address:* ${customerAddress.value.trim()}
+💰 *Delivery Fee:* ${formatPrice(deliveryFee)}`;
   }
+
   const paymentMethod = document.querySelector('input[name="payment"]:checked').value;
   let paymentNote = '';
   if (paymentMethod === 'transfer') {
-    paymentNote = '\n💳 Please send payment to:\nAccount Name: BuildinPixel\nAccount Number: 0123456789\nBank: XYZ Bank\n✅ Kindly send payment receipt after transfer. Thank You🙂';
+    paymentNote = `
+💳 *Payment Method:* Bank Transfer
+🏦 *Account Name:* BuildinPixel
+🔢 *Account Number:* 0123456789
+🏦 *Bank:* XYZ Bank
+✅ *Kindly send payment receipt after transfer. Thank You! 🙂*`;
   } else {
-    paymentNote = '\n💳 Payment Method: Pay With Cash';
+    paymentNote = `
+💳 *Payment Method:* Pay With Cash`;
   }
-  const message = `🛍️ *NEW ORDER – PixelStore*\n${contactInfo}\n🧾 ITEMS:\n${itemsText}\n💰 Subtotal: ${formatPrice(subtotal)}\n${deliveryInfo}\n💰 Total before discount: ${formatPrice(totalBeforeDiscount)}\n${discountApplied ? `🎁 Discount (Code: LAWAL): -${formatPrice(discount)}\n` : ''}💰 FINAL TOTAL: ${formatPrice(finalTotal)}\n${paymentNote}\n*Note: Use product codes (e.g., PX-001) to locate items quickly.*`;
+
+  // ✅ Final formatted message with clear sections
+  const message = `🛍️ *NEW ORDER – PixelStore*
+
+${contactInfo}
+
+🧾 *ORDER ITEMS:*
+${itemsText}
+
+📊 *ORDER SUMMARY:*
+💰 *Subtotal:* ${formatPrice(subtotal)}
+${deliveryInfo}
+${discountApplied ? `🎁 *Discount (Code: LAWAL):* -${formatPrice(discount)}\n` : ''}
+💰 *FINAL TOTAL:* ${formatPrice(finalTotal)}
+
+${paymentNote}
+
+❗ *Note:* Use product codes (e.g., PX-001) to locate items quickly.`;
+
   return message;
 }
     // Show success message
@@ -1791,6 +1868,7 @@ window.addEventListener('click', function(e) {
     productModal.style.display = 'none';
   }
 });
+
     // Event Listeners
     floatingCart.addEventListener('click', () => {
       renderCart();
