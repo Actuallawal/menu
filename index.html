@@ -1243,7 +1243,7 @@
             <input type="radio" name="payment" value="transfer" checked> Bank Transfer
         </label>
         <label class="payment-option">
-            <input type="radio" name="payment" value="whatsapp"> Pay With Cash
+        <input type="radio" name="payment" value="whatsapp"> Cash/POS
         </label>
         </div>
       </div>
@@ -1783,10 +1783,11 @@ ${pickupTime ? `⏰ *Pickup Time:* ${pickupTime}` : ''}`;
 🏦 *Account Name:* BuildinPixel
 🔢 *Account Number:* 0123456789
 🏦 *Bank:* XYZ Bank
+
 ✅ *Kindly send payment receipt after transfer. Thank You! 🙂*`;
   } else {
     paymentNote = `
-💳 *Payment Method:* Pay With Cash`;
+💳 *Payment Method:* Cash/POS`;
   }
 
   // ✅ Final formatted message with clear sections
