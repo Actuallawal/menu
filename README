@@ -1,193 +1,144 @@
-# 🛍️ PixelStore – Modern Food & E-Commerce Template
+# 🍽️ Restaurant Menu Web App  
 
-A **responsive e-commerce website** built with **HTML, CSS, and JavaScript**, designed for **restaurants, food vendors, and online stores** that want a **simple yet modern** online ordering experience.
-
-Developed and designed by **BuildinPixel** 🚀 — delivered in just **2 days!**
-
----
-
-## 🌟 Features
-
-✅ Fully Responsive Design (mobile-first)
-✅ Product Grid with Images, Name, and Price
-✅ Cart System with Add/Remove & Live Total
-✅ Local Storage – Keeps Cart Saved
-✅ Delivery or Pickup Option
-✅ Checkout Modal (User Details + Payment Type)
-✅ WhatsApp Order Integration (sends order summary)
-✅ Product Search (by name or code)
-✅ Floating Cart Button with Item Count
-✅ Subtle Animations for Modern Feel
+A fully responsive, real-time restaurant ordering web app built with **Supabase** and **vanilla JavaScript**.  
+Customers can browse meals, add to cart, view categories, choose order type (Dine-in / Takeaway), and place orders directly via **WhatsApp**.  
+The admin dashboard updates the frontend in **real time** — when meals are added, edited, or archived, the menu instantly updates without reloading.  
 
 ---
 
-## 🧱 Sections Included
+## 🚀 Features  
 
-| Section              | Description                                          |
-| -------------------- | ---------------------------------------------------- |
-| **Header**           | Sticky top bar with logo, navigation, and cart count |
-| **Hero Section**     | Bold call-to-action area with buttons                |
-| **Search Bar**       | Search products dynamically                          |
-| **Products Section** | JS-generated product cards grid                      |
-| **About Section**    | Short restaurant or store story                      |
-| **Cart Modal**       | Add, remove, checkout, delivery options              |
-| **Footer**           | Contact info and social links                        |
-
----
-
-## 🧩 Tech Stack
-
-* **HTML5** – Structure
-* **CSS3** – Styling & layout
-* **JavaScript (ES6)** – Functionality
-* **Google Fonts (Inter)** – Clean typography
-* **WhatsApp API** – For instant checkout
+- ✅ **Dynamic Menu Display** — Meals fetched from Supabase and grouped by category  
+- 🔁 **Real-time Sync** — Instantly reflects added, updated, or archived meals  
+- 🛒 **Cart System** — Add, remove, or adjust items with live totals  
+- 💬 **WhatsApp Order Flow** — Sends order summary directly to restaurant’s WhatsApp  
+- 🌗 **Light/Dark Mode** — Theme toggle with persistent state  
+- 🍔 **Category Tabs** — Filter meals instantly by category  
+- ⚡ **Optimized Caching** — Faster load times via local caching  
+- 📱 **Responsive Layout** — Works smoothly on mobile, tablet, and desktop  
 
 ---
 
-## 🚀 Getting Started
+## 🧩 Tech Stack  
 
-### 1️⃣ Clone this Repository
+| Layer | Technology |
+|:------|:------------|
+| **Frontend** | HTML, CSS, JavaScript (Vanilla JS) |
+| **Backend** | [Supabase](https://supabase.com) — Database + Realtime |
+| **Hosting** | [Netlify](https://www.netlify.com) |
+| **Integration** | WhatsApp API for order messages |
 
+---
+
+## ⚙️ Setup Instructions  
+
+### 1️⃣ Clone Repository  
 ```bash
-git clone https://github.com/yourusername/pixelstore.git
-```
+git clone https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
+cd YOUR_REPO_NAME
+````
 
-### 2️⃣ Open in Browser
+### 2️⃣ Configure Supabase
 
-Simply open `index.html` in your browser to preview the site.
+Create a new project on [Supabase](https://supabase.com) and add the following tables:
 
-### 3️⃣ Optional (for live testing)
+#### 🧾 `meals` Table
 
-Use VS Code with the **Live Server** extension for better testing.
+| Column      | Type      | Description              |
+| :---------- | :-------- | :----------------------- |
+| id          | uuid      | Primary key              |
+| name        | text      | Meal name                |
+| price       | numeric   | Price of the meal        |
+| description | text      | Meal description         |
+| image_url   | text      | Image link               |
+| category    | text      | Meal category            |
+| archived    | boolean   | Whether meal is hidden   |
+| created_at  | timestamp | Auto-generated timestamp |
 
----
+#### 🛍️ `orders` Table
 
-## ⚙️ Installation & Customization
+| Column         | Type      | Description               |
+| :------------- | :-------- | :------------------------ |
+| customer_name  | text      | Customer’s name           |
+| order_type     | text      | dine-in / takeaway        |
+| items          | json      | Ordered items (array)     |
+| total_amount   | numeric   | Total order cost          |
+| payment_method | text      | cash / transfer           |
+| status         | text      | pending / completed       |
+| table_number   | text      | Table number (if dine-in) |
+| created_at     | timestamp | Timestamp                 |
 
-### 🛒 1. Add Your Own Products
-
-Open your **main.js** (or similar JS file) and find the product array:
-
-```js
-const products = [
-  {
-    id: 1,
-    code: "PXL01",
-    name: "Jollof Rice with Chicken",
-    desc: "Served hot and spicy 🍗",
-    price: 2500,
-    img: "images/jollof.jpg"
-  },
-  {
-    id: 2,
-    code: "PXL02",
-    name: "Shawarma Combo",
-    desc: "Delicious beef shawarma wrap 🌯",
-    price: 1800,
-    img: "images/shawarma.jpg"
-  }
-];
-```
-
-Just edit or add new products with your image paths and details.
-
----
-
-### 💸 2. Change the WhatsApp Number
-
-Scroll to the **sendToWhatsApp()** function and replace the placeholder with your real number:
+Then, replace the keys in your script:
 
 ```js
-const phoneNumber = "2348012345678"; // Change to your WhatsApp number
+const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+const SUPABASE_KEY = 'YOUR_PUBLIC_ANON_KEY';
 ```
 
 ---
 
-### 🖌️ 3. Customize Colors
+### 3️⃣ Run Locally
 
-Edit your `style.css` to change the site’s theme.
-For a **food restaurant**, use this **60:30:10 color rule**:
+Simply open `index.html` in your browser or use a local server (VS Code Live Server, etc.).
 
-```css
-:root {
-  --primary: #E53935;   /* 🍅 Red (60%) - Dominant */
-  --secondary: #FDD835; /* 🍟 Yellow (30%) - Highlights */
-  --accent: #FFFFFF;    /* 🍽️ White (10%) - Text & background contrast */
-}
-```
+### 4️⃣ Deploy Online
+
+Deploy the project using [Netlify](https://www.netlify.com) or [Vercel](https://vercel.com).
+Upload both your **frontend (index2.html)** and **dashboard (admin.html)** files.
 
 ---
 
-### 📦 4. Update Delivery Fee & Logic
+## 💬 WhatsApp Integration
 
-Find the `calculateDeliveryFee()` function and update your delivery cost or region logic.
-Example:
+Orders are sent directly to your WhatsApp.
+To update your restaurant number, change this line in the script:
 
 ```js
-function calculateDeliveryFee() {
-  return 1000; // Set your flat delivery fee
-}
-```
-
----
-
-### 💳 5. Payment Options
-
-You can add or customize payment types in the checkout modal HTML:
-
-```html
-<select id="paymentType">
-  <option value="Cash">Cash on Delivery</option>
-  <option value="Transfer">Bank Transfer</option>
-</select>
-```
-
----
-
-### 💬 6. WhatsApp Order Summary
-
-When a user checks out, the cart details are formatted and sent via WhatsApp automatically. Example message:
-
-```
-Hello, I’d like to place an order:
-1x Jollof Rice with Chicken - ₦2500
-1x Shawarma Combo - ₦1800
-Delivery: ₦1000
-Total: ₦5300
-Name: John Doe
-Address: Gwarinpa, Abuja
-Payment: Transfer
+window.open(`https://wa.me/234XXXXXXXXXX?text=${encodeURIComponent(waMessage)}`, '_blank');
 ```
 
 ---
 
 ## 🧠 Developer Notes
 
-* All products and cart logic are handled in **main.js**
-* Uses **localStorage** to persist cart items
-* Easy to integrate with Paystack, Flutterwave, or Firebase later
+* Archiving a meal in the admin panel hides it from the menu **in real time**.
+* Adjust caching duration inside your JS file:
+
+  ```js
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+  ```
+* Real-time updates handled by Supabase:
+
+  ```js
+  supabase
+    .channel('public:meals')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'meals' }, loadMeals)
+    .subscribe();
+  ```
 
 ---
 
-## 🧰 Future Upgrades
+## 🌟 Future Improvements
 
-* [ ] Admin Dashboard for uploading products
-* [ ] Add category filters (e.g. Drinks, Meals, Snacks)
-* [ ] Add Paystack payment integration
-* [ ] Add order tracking
-
----
-
-## 🪪 License
-
-Open source under the **MIT License** — credit **BuildinPixel** when used publicly.
+* 🔐 Admin authentication
+* 📊 Advanced order analytics
+* 💳 Payment integration (Paystack / Flutterwave)
+* 🏪 Multi-branch support
 
 ---
 
-## 💬 Connect
+## 👨🏽‍💻 Author
 
-📧 **Email:** [buildinpixel@gmail.com](mailto:buildinpixel@gmail.com)
-🌐 **Website:** [https://buildinpixel.com](https://buildinpixel.com)
-📸 **Instagram:** [@buildinpixel](https://instagram.com/buildinpixel)
-💼 **LinkedIn:** [BuildinPixel](https://linkedin.com/company/buildinpixel)
+**Seidu Lawal (Actual Lawal)**
+🎨 2D Animation & Content Creator
+📍 Auchi, Edo State, Nigeria
+
+**Socials:**
+
+* [Instagram](https://instagram.com/actuallawal)
+* [TikTok](https://tiktok.com/@actuallawal)
+* [Facebook](https://facebook.com/actuallawal)
+
+---
+
+> ⚡ Built with passion, simplicity, and real-time performance by **Actual Lawal**.
