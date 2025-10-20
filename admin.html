@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin</title>
+  <!-- 🌟 Favicon & App Icons -->
+<link rel="icon" type="image/png" sizes="16x16" href="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png">
+<link rel="icon" type="image/png" sizes="48x48" href="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png">
+<link rel="shortcut icon" href="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png" type="image/png">
+<meta name="theme-color" content="#000000">
+<meta name="msapplication-TileImage" content="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png">
+<meta name="msapplication-TileColor" content="#000000">
+
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /* ========= THEME VARIABLES (dark default) ========= */
+    :root{
+      --bg:#0b0f12;
+      --card:#0f1417;
+      --muted:#9aa6ad;
+      --text:#e6eef3;
+      --accent:#10b981;
+      --danger:#ef4444;
+      --border:rgba(255,255,255,0.06);
+      --glass: rgba(255,255,255,0.02);
+      --success:#16a34a;
+    }
+    [data-theme="light"]{
+      --bg:#f7fafc;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --text:#0f1724;
+      --accent:#0ea5a3;
+      --danger:#dc2626;
+      --border:#e6eef2;
+      --glass: rgba(0,0,0,0.03);
+      --success:#059669;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Inter',system-ui,-apple-system,sans-serif;background:radial-gradient(circle at top left, #0d9488, #0f172a 70%);color:var(--text);transition:background .3s,color .3s}
+    .login-container{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+    .login-card{background:var(--card);border-radius:20px;padding:40px;width:100%;max-width:420px;box-shadow:0 12px 32px rgba(0,0,0,0.3);backdrop-filter:blur(10px);background:rgba(15,20,23,0.8);border:1px solid var(--border);opacity:0;transform:scale(0.95);animation:fadeInUp 0.6s ease-out forwards}
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: scale(1); }
+    }
+    .login-header{text-align:center;margin-bottom:32px}
+    .login-header h1{font-size:28px;font-weight:700;margin-bottom:8px;color:var(--accent)}
+    .login-header p{color:var(--muted);font-size:14px}
+    
+    .form-group{margin-bottom:20px;position:relative}
+    .form-label{display:block;font-size:14px;color:var(--muted);margin-bottom:8px;font-weight:500}
+    .form-input{width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:16px;transition:all 0.2s}
+    .form-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(16,185,129,0.2)}
+    .form-input.error{border-color:var(--danger)}
+    .toggle-password{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--muted);cursor:pointer;font-size:18px}
+    
+    .form-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;font-size:14px}
+    .remember-me{display:flex;align-items:center;gap:8px}
+    .remember-me input{width:auto}
+    .forgot-password{color:var(--accent);text-decoration:none}
+    .forgot-password:hover{text-decoration:underline}
+    
+    .btn{width:100%;padding:14px;border-radius:12px;border:none;font-weight:600;font-size:16px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+    .btn::after{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,0.3);border-radius:50%;transform:translate(-50%,-50%);transition:width 0.6s,height 0.6s}
+    .btn:active::after{width:300px;height:300px}
+    .btn-primary{background:var(--accent);color:white}
+    .btn-primary:hover{background:#0da271}
+    .btn-primary:disabled{opacity:0.7;cursor:not-allowed}
+    .btn-primary.loading{position:relative;padding-right:40px}
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid transparent;border-top-color:white;border-radius:50%;animation:spin 1s linear infinite;margin-left:8px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    
+    .login-footer{text-align:center;margin-top:24px;color:var(--muted);font-size:13px;padding-top:24px;border-top:1px solid var(--border)}
+    
+    .toast-container{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000}
+    .toast{padding:12px 20px;border-radius:12px;background:var(--card);border:1px solid var(--border);box-shadow:0 6px 20px rgba(0,0,0,0.3);margin-bottom:10px;opacity:0;transform:translateY(20px);animation:slideInUp 0.3s forwards, fadeOut 0.3s 2.7s forwards}
+    @keyframes slideInUp{to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeOut{to{opacity:0;transform:translateY(-20px)}}
+    .toast.success{border-left:4px solid var(--success)}
+    .toast.error{border-left:4px solid var(--danger)}
+    .toast.info{border-left:4px solid var(--accent)}
+    .toast.warning{border-left:4px solid #f59e0b}
+    
+    .shake{animation:shake 0.5s}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+    
+    @media (max-width:480px){
+      .login-card{padding:32px;width:90%;}
+      .login-header h1{font-size:24px}
+    }
+  </style>
+</head>
+<body data-theme="dark">
+  <div class="login-container">
+    <div class="login-card" id="loginCard">
+      <div class="login-header">
+        <h1>Admin</h1>
+        <p>Secure access to your dashboard</p>
+      </div>
+      
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginUsername" class="form-label">Username</label>
+          <input id="loginUsername" name="username" autocomplete="username" class="form-input" required />
+          <div class="error-message" id="usernameError" style="color:var(--danger);font-size:12px;margin-top:4px;display:none;"></div>
+        </div>
+        
+        <div class="form-group">
+          <label for="loginPassword" class="form-label">Password</label>
+          <input id="loginPassword" name="password" type="password" autocomplete="current-password" class="form-input" required />
+          <span class="toggle-password" id="togglePassword">👁️</span>
+          <div class="error-message" id="passwordError" style="color:var(--danger);font-size:12px;margin-top:4px;display:none;"></div>
+        </div>
+        
+        <div class="form-row">
+          <label class="remember-me">
+            <input type="checkbox" id="rememberMe" />
+            Remember me
+          </label>
+          <a href="#" class="forgot-password">Forgot password?</a>
+        </div>
+        
+        <button type="submit" class="btn btn-primary" id="loginBtn">
+          Sign in
+        </button>
+      </form>
+      
+      <div class="login-footer">
+        © 2025 PixelPunch — Secure Access Only
+      </div>
+    </div>
+  </div>
+  
+  <div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* ================== Supabase config (user-provided) ================== */
+const SUPABASE_URL = "https://tbnjvmibyzeqmgnaavpc.supabase.co";
+const SUPABASE_KEY = "sb_publishable_GfSPdiJgIXfURhNDREfPEw_1uNQvT46";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+/* ==================================================================== */
+
+/* DOM refs */
+const loginForm = document.getElementById('loginForm');
+const loginUsername = document.getElementById('loginUsername');
+const loginPassword = document.getElementById('loginPassword');
+const loginBtn = document.getElementById('loginBtn');
+const togglePassword = document.getElementById('togglePassword');
+const rememberMe = document.getElementById('rememberMe');
+const toastContainer = document.getElementById('toastContainer');
+const loginCard = document.getElementById('loginCard');
+
+/* Theme handling */
+function initTheme(){
+  const chosen = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', chosen==='light' ? 'light' : 'dark');
+}
+initTheme();
+
+/* Toast notifications */
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  toastContainer.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+/* Password toggle */
+let passwordVisible = false;
+togglePassword.addEventListener('click', () => {
+  passwordVisible = !passwordVisible;
+  loginPassword.type = passwordVisible ? 'text' : 'password';
+  togglePassword.textContent = passwordVisible ? '🙈' : '👁️';
+});
+
+/* Form validation */
+function validateForm() {
+  const username = loginUsername.value.trim();
+  const password = loginPassword.value;
+  let isValid = true;
+  
+  // Reset errors
+  loginUsername.classList.remove('error');
+  loginPassword.classList.remove('error');
+  document.getElementById('usernameError').style.display = 'none';
+  document.getElementById('passwordError').style.display = 'none';
+  
+  if (!username) {
+    loginUsername.classList.add('error');
+    document.getElementById('usernameError').textContent = 'Username is required';
+    document.getElementById('usernameError').style.display = 'block';
+    isValid = false;
+  }
+  
+  if (!password) {
+    loginPassword.classList.add('error');
+    document.getElementById('passwordError').textContent = 'Password is required';
+    document.getElementById('passwordError').style.display = 'block';
+    isValid = false;
+  }
+  
+  return isValid;
+}
+
+/* Remember me functionality */
+// Load remembered username
+const rememberedUsername = localStorage.getItem('admin_username');
+if (rememberedUsername) {
+  loginUsername.value = rememberedUsername;
+  rememberMe.checked = true;
+}
+
+/* Login form submission */
+loginForm.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  
+  if (!validateForm()) {
+    return;
+  }
+  
+  const username = loginUsername.value.trim();
+  const password = loginPassword.value;
+  
+  // Save username if remember me is checked
+  if (rememberMe.checked) {
+    localStorage.setItem('admin_username', username);
+  } else {
+    localStorage.removeItem('admin_username');
+  }
+  
+  // Show loading state
+  loginBtn.innerHTML = 'Signing in <div class="spinner"></div>';
+  loginBtn.disabled = true;
+  loginBtn.classList.add('loading');
+  
+  try {
+    // 🔹 Keep existing Supabase logic intact
+    const { data, error } = await supabase.from('users').select('id,username,role,password').eq('username', username).limit(1).single();
+    
+    if (error || !data) {
+      throw new Error('Invalid credentials');
+    }
+    
+    // 🔹 Compare password with stored hash (plaintext comparison as per original logic)
+    if (data.password !== password) {
+      throw new Error('Invalid credentials');
+    }
+    
+    // Success - save session and redirect
+    localStorage.setItem('admin_logged_in', 'true');
+    localStorage.setItem('admin_user', JSON.stringify({ id: data.id, username: data.username }));
+    
+    showToast('Login successful!', 'success');
+    
+    // Smooth fade out and redirect
+    loginCard.style.opacity = '0';
+    loginCard.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      window.location.href = 'dashboard.html';
+    }, 300);
+    
+  } catch (err) {
+    console.error(err);
+    showToast('Invalid username or password', 'error');
+    
+    // Shake animation on error
+    loginCard.classList.add('shake');
+    setTimeout(() => {
+      loginCard.classList.remove('shake');
+    }, 500);
+    
+    // Reset button state
+    loginBtn.innerHTML = 'Sign in';
+    loginBtn.disabled = false;
+    loginBtn.classList.remove('loading');
+  }
+});
+
+// Enable/disable login button based on form validity
+function updateLoginButtonState() {
+  const username = loginUsername.value.trim();
+  const password = loginPassword.value;
+  loginBtn.disabled = !(username && password);
+}
+
+loginUsername.addEventListener('input', updateLoginButtonState);
+loginPassword.addEventListener('input', updateLoginButtonState);
+updateLoginButtonState();
+</script>
+</body>
+</html>
