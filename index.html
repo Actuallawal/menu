@@ -106,7 +106,7 @@
       font-weight: 700;
     }
     .theme-btn:hover, .cart-top-btn:hover {
-      background: rgba(16, 185, 129, 0.1);
+      background: rgba(243, 113, 0, 0.1);
     }
     .search-box {
       width: 100%;
@@ -214,23 +214,34 @@
       justify-content: space-between;
       padding: 16px;
     }
-    
     .meal-title {
-  font-size: 1rem;
-  font-weight: 700;
-  margin: 0 0 8px;
-  line-height: 1.3;
-  min-height: .5em; /* Exactly 2 lines */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
+      font-size: 1rem;
+      font-weight: 700;
+      margin: 0 0 8px;
+      line-height: 1.3;
+      min-height: 2.6em;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .meal-description {
+      font-size: 0.92rem;
+      color: var(--muted);
+      margin-bottom: 12px;
+      line-height: 1.4;
+      min-height: 2.8em;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      flex: 1;
+    }
     .meal-price {
       font-weight: 800;
       font-size: 1rem;
       color: var(--accent);
-      margin-bottom: .5px;
+      margin-bottom: 16px;
     }
     .btn-order {
       width: 100%;
@@ -263,7 +274,7 @@
       height: 300px;
     }
     .btn-order:hover {
-      background: #0da271;
+      background: #d15a00;
       transform: translateY(-2px);
     }
     .meal-card.unavailable {
@@ -423,7 +434,7 @@
     .cart-breakdown {
       margin: 16px 0;
       padding: 16px;
-      background: rgba(16, 185, 129, 0.05);
+      background: rgba(243, 113, 0, 0.05);
       border-radius: 14px;
       border: 1px solid var(--border);
     }
@@ -485,7 +496,7 @@
     }
     .order-type-btn.active {
       border-color: var(--accent);
-      background: rgba(16, 185, 129, 0.1);
+      background: rgba(243, 113, 0, 0.1);
       color: var(--accent);
     }
     .hidden {
@@ -511,7 +522,7 @@
       transition: var(--transition);
     }
     .btn-primary-large:hover {
-      background: #0da271;
+      background: #d15a00;
       transform: translateY(-2px);
     }
     .btn-secondary-small {
@@ -527,7 +538,7 @@
       transition: var(--transition);
     }
     .btn-secondary-small:hover {
-      background: rgba(16, 185, 129, 0.1);
+      background: rgba(243, 113, 0, 0.1);
       border-color: var(--accent);
       color: var(--accent);
     }
@@ -600,7 +611,7 @@
       transition: var(--transition);
     }
     #mealModalOrderBtn:hover {
-      background: #0da271;
+      background: #d15a00;
       transform: translateY(-2px);
     }
     .menu-root { padding: 20px 0; }
@@ -619,13 +630,13 @@
       justify-content: center;
       border: none;
       cursor: pointer;
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 6px 20px rgba(243, 113, 0, 0.4);
       z-index: 999;
       transition: var(--transition);
     }
     .floating-cart:hover {
       transform: scale(1.08);
-      box-shadow: 0 8px 28px rgba(16, 185, 129, 0.6);
+      box-shadow: 0 8px 28px rgba(243, 113, 0, 0.6);
     }
     .cart-count {
       position: absolute;
@@ -677,7 +688,7 @@
       background: var(--accent);
       color: white;
       transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+      box-shadow: 0 4px 12px rgba(243, 113, 0, 0.4);
     }
     .loading, .empty-state {
       text-align: center;
@@ -853,23 +864,23 @@
   </div>
 
   <!-- Validation Error Modal -->
-<div id="validationModal" class="modal-overlay">
-  <div class="cart-modal" style="max-width: 400px;">
-    <div class="modal-header">
-      <h2>Missing Information</h2>
-      <button class="close-modal" id="closeValidationModal">×</button>
-    </div>
-    <div class="modal-body" style="text-align: center; padding: 24px;">
-      <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
-      <div id="validationMessage" style="font-size: 16px; line-height: 1.5; color: var(--text);">
-        Please fill in all required fields.
+  <div id="validationModal" class="modal-overlay">
+    <div class="cart-modal" style="max-width: 400px;">
+      <div class="modal-header">
+        <h2>Missing Information</h2>
+        <button class="close-modal" id="closeValidationModal">×</button>
+      </div>
+      <div class="modal-body" style="text-align: center; padding: 24px;">
+        <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+        <div id="validationMessage" style="font-size: 16px; line-height: 1.5; color: var(--text);">
+          Please fill in all required fields.
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="fixValidation" class="btn-primary-large">Go Back</button>
       </div>
     </div>
-    <div class="modal-footer">
-      <button id="fixValidation" class="btn-primary-large">Go Back</button>
-    </div>
   </div>
-</div>
 
   <!-- WhatsApp Confirm Modal -->
   <div id="whatsappModal" class="modal-overlay">
@@ -884,7 +895,6 @@
         <button id="cancelWhatsapp" class="btn-secondary-small">Cancel</button>
       </div>
     </div>
-    <a href="/admin" class="admin-link">Admin Login</a>
   </div>
 
   <!-- Footer -->
@@ -901,6 +911,7 @@
         <img src="https://i.ibb.co/qLXRQjhH/icons8-tiktok-50.png" alt="TikTok">
       </a>
     </div>
+    <a href="/admin" class="admin-link">Admin Login</a>
   </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
@@ -930,108 +941,24 @@ let currentMeal = null;
 let currentOrderType = 'dinein';
 
 /* ===========================
-   ✅ TOAST
+   ✅ THEME TOGGLE
 =========================== */
-function showToast(message, type = 'info') {
-  toastMessage.textContent = message;
-  toast.className = 'toast ' + type;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
+function initTheme() {
+  const t = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
+  themeBtn.textContent = t === 'light' ? '🌙' : '☀️';
 }
-
-/* ===========================
-   ✅ PLACE ORDER VALIDATION
-=========================== */
-document.getElementById('placeOrder').addEventListener('click', async () => {
-  // 1. Check if cart is empty
-  if (cart.length === 0) {
-    closeCartModal();
-    showToast('Empty cart. Add meals to order.', 'warning');
-    return;
-  }
-
-  // 2. Get form values
-  const customerName = document.getElementById('custName').value.trim();
-  const tableNumber = currentOrderType === 'dinein' 
-    ? document.getElementById('tableNo').value.trim() 
-    : null;
-
-  // 3. Validate required fields
-  if (!customerName) {
-    showValidationPopup('Enter your name.');
-    return;
-  }
-
-  if (currentOrderType === 'dinein' && !tableNumber) {
-    showValidationPopup('Table number required. Dine-in Order.');
-    return;
-  }
-
-  // ✅ All validations passed — proceed to order submission
-  const paymentMethod = document.getElementById('paymentMethod').value;
-  const items = cart.map(i => ({
-    id: i.id,
-    name: i.name,
-    quantity: i.quantity,
-    unitPrice: i.price
-  }));
-  const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
-  const total = subtotal;
-
-  const ORDER_TYPES_DB = {
-    dinein: 'dine-in',
-    takeaway: 'takeaway'
-  };
-
-  const order = {
-    customer_name: customerName,
-    order_type: ORDER_TYPES_DB[currentOrderType],
-    items: JSON.stringify(items),
-    total_amount: total,
-    payment_method: paymentMethod,
-    status: 'pending',
-    table_number: tableNumber || null,
-    created_at: new Date().toISOString()
-  };
-
-  try {
-    const { error } = await supabase.from('orders').insert([order]);
-    if (error) throw error;
-    showWhatsappConfirm(order);
-  } catch (err) {
-    console.error('Order submission error:', err);
-    showToast('Failed to save order: ' + (err.message || 'Unknown error'), 'error');
-  }
+initTheme();
+themeBtn.addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme');
+  const next = cur === 'light' ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+  themeBtn.textContent = next === 'light' ? '🌙' : '☀️';
 });
 
-// Show validation popup
-function showValidationPopup(message) {
-  document.getElementById('validationMessage').textContent = message;
-  document.getElementById('validationModal').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-// Close validation popup
-function closeValidationPopup() {
-  document.getElementById('validationModal').classList.remove('active');
-  document.body.style.overflow = '';
-}
-
-// Attach event listeners for validation modal
-document.getElementById('closeValidationModal').addEventListener('click', closeValidationPopup);
-document.getElementById('fixValidation').addEventListener('click', closeValidationPopup);
-document.getElementById('validationModal').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('validationModal')) {
-    closeValidationPopup();
-  }
-});
-
-// Rest of the code remains the same (loadMeals, render, cart functions, etc.)
-// For brevity, only the validation logic is shown fully.
-// The rest of the implementation follows the structure from your original file.
-
 /* ===========================
-   ✅ INITIALIZE (partial)
+   ✅ LOAD MEALS — INCLUDES ARCHIVED
 =========================== */
 async function loadMeals() {
   loading.style.display = 'block';
@@ -1051,16 +978,56 @@ async function loadMeals() {
   }
 }
 
+/* ===========================
+   ✅ RENDER MEALS WITH CATEGORIES
+=========================== */
 function renderMealsByCategory(list) {
   if (!list.length) {
     mealsContainer.innerHTML = `<div class="empty-state">No meals available.</div>`;
     return;
   }
-  const categories = ['Main Course', 'Fast Food', 'Drinks & Beverages', 'Snacks & Sides', 'Desserts'];
+
+  const CATEGORIES = ['Main Course', 'Fast Food', 'Drinks & Beverages', 'Snacks & Sides', 'Desserts'];
+  const allCategories = ['all', ...CATEGORIES];
+
+  categoryTabs.innerHTML = allCategories.map(cat => `
+    <button class="category-tab ${cat === currentCategory ? 'active' : ''}" data-category="${cat}">
+      ${cat === 'all' ? 'All Items' : cat}
+    </button>
+  `).join('');
+
+  document.querySelectorAll('.category-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      currentCategory = tab.dataset.category;
+      filterAndRenderMeals();
+    });
+  });
+
+  filterAndRenderMeals();
+}
+
+function filterAndRenderMeals() {
+  let filtered = meals;
+  const searchTerm = searchBox.value.toLowerCase().trim();
+  if (searchTerm) {
+    filtered = meals.filter(meal => 
+      (meal.name && meal.name.toLowerCase().includes(searchTerm)) ||
+      (meal.description && meal.description.toLowerCase().includes(searchTerm))
+    );
+  }
+
+  if (currentCategory !== 'all') {
+    filtered = filtered.filter(m => m.category === currentCategory);
+  }
+
+  const CATEGORIES = ['Main Course', 'Fast Food', 'Drinks & Beverages', 'Snacks & Sides', 'Desserts'];
   let html = '';
+
   if (currentCategory === 'all') {
-    categories.forEach(cat => {
-      const group = list.filter(m => m.category === cat);
+    CATEGORIES.forEach(cat => {
+      const group = filtered.filter(m => m.category === cat);
       if (group.length > 0) {
         const available = group.filter(m => !m.archived);
         const unavailable = group.filter(m => m.archived);
@@ -1069,16 +1036,19 @@ function renderMealsByCategory(list) {
       }
     });
   } else {
-    const filtered = list.filter(m => m.category === currentCategory);
     const available = filtered.filter(m => !m.archived);
     const unavailable = filtered.filter(m => m.archived);
     const allInOrder = [...available, ...unavailable];
     html += `<div class="meals-grid">${allInOrder.map(createMealCard).join('')}</div>`;
   }
-  mealsContainer.innerHTML = html;
+
+  mealsContainer.innerHTML = html || '<div class="empty-state">No meals found in this category</div>';
   attachMealListeners();
 }
 
+/* ===========================
+   ✅ CREATE MEAL CARD
+=========================== */
 function createMealCard(meal) {
   const isUnavailable = meal.archived;
   return `
@@ -1097,6 +1067,9 @@ function createMealCard(meal) {
   `;
 }
 
+/* ===========================
+   ✅ MEAL & CART LISTENERS
+=========================== */
 function attachMealListeners() {
   document.querySelectorAll('.meal-card').forEach(card => {
     card.addEventListener('click', (e) => {
@@ -1119,6 +1092,9 @@ function attachMealListeners() {
   });
 }
 
+/* ===========================
+   ✅ MODALS & CART
+=========================== */
 function openMealDetailModal(meal) {
   currentMeal = meal;
   document.getElementById('mealModalImage').src = meal.image_url || 'https://placehold.co/600x400?text=Delicious+Meal';
@@ -1284,6 +1260,90 @@ document.getElementById('confirmModal').addEventListener('click', (e) => {
   }
 });
 
+/* ===========================
+   ✅ VALIDATION POPUP
+=========================== */
+function showValidationPopup(message) {
+  document.getElementById('validationMessage').textContent = message;
+  document.getElementById('validationModal').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeValidationPopup() {
+  document.getElementById('validationModal').classList.remove('active');
+  document.body.style.overflow = '';
+}
+document.getElementById('closeValidationModal').addEventListener('click', closeValidationPopup);
+document.getElementById('fixValidation').addEventListener('click', closeValidationPopup);
+document.getElementById('validationModal').addEventListener('click', (e) => {
+  if (e.target === document.getElementById('validationModal')) {
+    closeValidationPopup();
+  }
+});
+
+/* ===========================
+   ✅ PLACE ORDER
+=========================== */
+document.getElementById('placeOrder').addEventListener('click', async () => {
+  if (cart.length === 0) {
+    closeCartModal();
+    showToast('Empty cart. Add meals to order.', 'warning');
+    return;
+  }
+
+  const customerName = document.getElementById('custName').value.trim();
+  const tableNumber = currentOrderType === 'dinein' 
+    ? document.getElementById('tableNo').value.trim() 
+    : null;
+
+  if (!customerName) {
+    showValidationPopup('Enter your name.');
+    return;
+  }
+  if (currentOrderType === 'dinein' && !tableNumber) {
+    showValidationPopup('Table number required. Dine-in Order.');
+    return;
+  }
+
+  const paymentMethod = document.getElementById('paymentMethod').value;
+  const items = cart.map(i => ({
+    id: i.id,
+    name: i.name,
+    quantity: i.quantity,
+    unitPrice: i.price
+  }));
+  const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+  const total = subtotal;
+
+  // ✅ CORRECT ORDER_TYPE VALUES
+  const ORDER_TYPES_DB = {
+    dinein: 'dine-in',
+    takeaway: 'takeaway'
+  };
+
+  const order = {
+    customer_name: customerName,
+    order_type: ORDER_TYPES_DB[currentOrderType],
+    items: JSON.stringify(items),
+    total_amount: total,
+    payment_method: paymentMethod,
+    status: 'pending',
+    table_number: tableNumber || null,
+    created_at: new Date().toISOString()
+  };
+
+  try {
+    const { error } = await supabase.from('orders').insert([order]);
+    if (error) throw error;
+    showWhatsappConfirm(order);
+  } catch (err) {
+    console.error('Order submission error:', err);
+    showToast('Failed to save order: ' + (err.message || 'Unknown error'), 'error');
+  }
+});
+
+/* ===========================
+   ✅ WHATSAPP CONFIRM
+=========================== */
 function showWhatsappConfirm(orderData) {
   let items = orderData.items;
   if (typeof items === 'string') {
@@ -1355,10 +1415,19 @@ Total: ₦${total.toLocaleString()}`;
   showToast('Order placed! WhatsApp opened.', 'success');
 });
 
+/* ===========================
+   ✅ UTILITIES
+=========================== */
 function escapeHtml(str) {
   return str
-    ? str.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '<', '>': '>', '"': '&quot;', "'": '&#39;' }[c]))
+    ? str.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
     : '';
+}
+function showToast(message, type = 'info') {
+  toastMessage.textContent = message;
+  toast.className = 'toast ' + type;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
 searchBox.addEventListener('input', () => {
