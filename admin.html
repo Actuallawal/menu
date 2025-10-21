@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Menu</title>
+  <title>Admin</title>
   <!-- 🌟 Favicon & App Icons -->
 <link rel="icon" type="image/png" sizes="16x16" href="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png">
 <link rel="icon" type="image/png" sizes="32x32" href="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png">
@@ -13,1396 +13,289 @@
 <meta name="theme-color" content="#000000">
 <meta name="msapplication-TileImage" content="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png">
 <meta name="msapplication-TileColor" content="#000000">
+
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
   <style>
-    :root {
-      --bg: #0e1416;
-      --card: #1a2226;
-      --text: #e6eef3;
-      --muted: #9aa6ad;
-      --accent: #f37100;
-      --border: rgba(255,255,255,0.06);
-      --overlay: rgba(0, 0, 0, 0.6);
-      --shadow: rgba(0, 0, 0, 0.3);
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    /* ========= THEME VARIABLES (dark default) ========= */
+    :root{
+      --bg:#0b0f12;
+      --card:#0f1417;
+      --muted:#9aa6ad;
+      --text:#e6eef3;
+      --accent:#10b981;
+      --danger:#ef4444;
+      --border:rgba(255,255,255,0.06);
+      --glass: rgba(255,255,255,0.02);
+      --success:#16a34a;
     }
-    [data-theme="light"] {
-      --bg: #f8fafc;
-      --card: #ffffff;
-      --text: #0f1724;
-      --muted: #64748b;
-      --accent: #f37100;
-      --border: #e2e8f0;
-      --overlay: rgba(0, 0, 0, 0.4);
-      --shadow: rgba(0, 0, 0, 0.1);
+    [data-theme="light"]{
+      --bg:#f7fafc;
+      --card:#ffffff;
+      --muted:#6b7280;
+      --text:#0f1724;
+      --accent:#0ea5a3;
+      --danger:#dc2626;
+      --border:#e6eef2;
+      --glass: rgba(0,0,0,0.03);
+      --success:#059669;
     }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%;font-family:'Inter',system-ui,-apple-system,sans-serif;background:radial-gradient(circle at top left, #0d9488, #0f172a 70%);color:var(--text);transition:background .3s,color .3s}
+    .login-container{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+    .login-card{background:var(--card);border-radius:20px;padding:40px;width:100%;max-width:420px;box-shadow:0 12px 32px rgba(0,0,0,0.3);backdrop-filter:blur(10px);background:rgba(15,20,23,0.8);border:1px solid var(--border);opacity:0;transform:scale(0.95);animation:fadeInUp 0.6s ease-out forwards}
+    @keyframes fadeInUp {
+      to { opacity: 1; transform: scale(1); }
     }
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-      transition: var(--transition);
-    }
-    .wrap {
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px 12px;
-    }
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-      position: sticky;
-      top: 0;
-      background: var(--bg);
-      z-index: 100;
-      box-shadow: 0 2px 8px var(--shadow);
-    }
-    header h1 {
-      font-weight: 700;
-      font-size: 26px;
-    }
-    .header-subtitle {
-      font-size: 14px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-    .theme-btn, .cart-top-btn {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: var(--transition);
-      position: relative;
-    }
-    .cart-count-top {
-      position: absolute;
-      top: -4px;
-      right: -4px;
-      background: #ef4444;
-      color: white;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      font-size: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-    }
-    .theme-btn:hover, .cart-top-btn:hover {
-      background: rgba(16, 185, 129, 0.1);
-    }
-    .search-box {
-      width: 100%;
-      padding: 14px 16px;
-      border-radius: 14px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 16px;
-      margin-bottom: 24px;
-      transition: var(--transition);
-    }
-    .search-box:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    .category-tabs {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
-      overflow-x: auto;
-      padding: 8px 0;
-      scrollbar-width: none;
-    }
-    .category-tabs::-webkit-scrollbar {
-      display: none;
-    }
-    .category-tab {
-      padding: 8px 16px;
-      border-radius: 20px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 14px;
-      font-weight: 500;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: var(--transition);
-    }
-    .category-tab:hover {
-      color: var(--text);
-      border-color: var(--accent);
-    }
-    .category-tab.active {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-    }
-    .meals-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 28px;
-      justify-items: center;
-      padding: 12px;
-    }
-    @media (min-width: 1200px) {
-      .meals-grid { grid-template-columns: repeat(4, 1fr); }
-    }
-    @media (min-width: 768px) and (max-width: 1199px) {
-      .meals-grid { gap: 20px; padding: 8px; }
-    }
-    @media (max-width: 767px) {
-      .meals-grid { grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 0 8px; }
-    }
-    @media (max-width: 480px) {
-      .meals-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    }
-    .meal-card {
-      background: var(--card);
-      border-radius: 15px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      width: 100%;
-      max-width: 290px;
-      height: 350px;
-      box-shadow: 0 8px 25px rgba(0,0,0,0.25);
-      transition: transform 0.25s ease, box-shadow 0.25s ease;
-      cursor: pointer;
-      position: relative;
-    }
-    .meal-card:hover {
-      transform: translateY(-6px) scale(1.02);
-      box-shadow: 0 12px 30px rgba(0,0,0,0.4);
-      border-color: var(--accent);
-    }
-    .meal-card:active {
-      transform: scale(0.98);
-    }
-    .meal-image {
-      width: 100%;
-      height: 160px;
-      object-fit: cover;
-      background: #111;
-      transition: transform 0.6s ease;
-    }
-    .meal-card:hover .meal-image {
-      transform: scale(1.08);
-    }
-    .meal-info {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 16px;
-    }
+    .login-header{text-align:center;margin-bottom:32px}
+    .login-header h1{font-size:28px;font-weight:700;margin-bottom:8px;color:var(--accent)}
+    .login-header p{color:var(--muted);font-size:14px}
     
-    .meal-title {
-  font-size: 1rem;
-  font-weight: 700;
-  margin: 0 0 8px;
-  line-height: 1.3;
-  min-height: .5em; /* Exactly 2 lines */
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-    .meal-price {
-      font-weight: 800;
-      font-size: 1rem;
-      color: var(--accent);
-      margin-bottom: .5px;
-    }
-    .btn-order {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      background: var(--accent);
-      color: white;
-      font-weight: 700;
-      font-size: 15px;
-      border: none;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      position: relative;
-      overflow: hidden;
-    }
-    .btn-order::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
-    }
-    .btn-order:active::after {
-      width: 300px;
-      height: 300px;
-    }
-    .btn-order:hover {
-      background: #0da271;
-      transform: translateY(-2px);
-    }
-    .meal-card.unavailable {
-      opacity: 0.6;
-      position: relative;
-    }
-    .unavailable-badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: rgba(239, 68, 68, 0.8);
-      color: white;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      z-index: 10;
-    }
-    .btn-order.unavailable {
-      background: #666;
-      cursor: not-allowed;
-    }
-    .btn-order.unavailable:hover {
-      background: #666;
-      transform: none;
-    }
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: var(--overlay);
-      backdrop-filter: blur(10px);
-      display: none;
-      z-index: 1000;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .modal-overlay.active {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 1;
-    }
-    .cart-modal {
-      background: var(--card);
-      border-radius: 20px;
-      width: 95%;
-      max-width: 480px;
-      max-height: 90vh;
-      display: flex;
-      flex-direction: column;
-      transform: translateY(20px);
-      opacity: 0;
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-      backdrop-filter: blur(10px);
-      background: rgba(26, 34, 38, 0.8);
-    }
-    .modal-overlay.active .cart-modal {
-      transform: translateY(0);
-      opacity: 1;
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 20px 24px 16px;
-      border-bottom: 1px solid var(--border);
-    }
-    .modal-header h2 {
-      font-size: 22px;
-      font-weight: 700;
-    }
-    .close-modal {
-      background: none;
-      border: none;
-      color: var(--text);
-      font-size: 24px;
-      cursor: pointer;
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .close-modal:hover {
-      background: var(--border);
-    }
-    .modal-body {
-      padding: 0 24px;
-      overflow-y: auto;
-      max-height: 50vh;
-    }
-    .cart-items {
-      margin: 16px 0;
-    }
-    .cart-item {
-      display: flex;
-      gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--border);
-    }
-    .cart-item img {
-      width: 50px;
-      height: 50px;
-      object-fit: cover;
-      border-radius: 8px;
-      flex-shrink: 0;
-    }
-    .cart-item-info {
-      flex: 1;
-    }
-    .cart-item-name {
-      font-weight: 600;
-      font-size: 15px;
-      margin-bottom: 4px;
-    }
-    .cart-item-price {
-      color: var(--muted);
-      font-size: 14px;
-      margin-bottom: 6px;
-    }
-    .cart-item-controls {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .quantity-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 14px;
-      transition: var(--transition);
-    }
-    .quantity-btn:hover {
-      background: var(--accent);
-      color: white;
-      border-color: var(--accent);
-    }
-    .cart-item-total {
-      font-weight: 700;
-      color: var(--accent);
-      min-width: 70px;
-      text-align: right;
-      font-size: 15px;
-    }
-    .cart-breakdown {
-      margin: 16px 0;
-      padding: 16px;
-      background: rgba(16, 185, 129, 0.05);
-      border-radius: 14px;
-      border: 1px solid var(--border);
-    }
-    .breakdown-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 6px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-    .breakdown-total {
-      display: flex;
-      justify-content: space-between;
-      font-weight: 700;
-      font-size: 18px;
-      margin-top: 8px;
-    }
-    .form-group {
-      margin-bottom: 16px;
-    }
-    .form-label {
-      display: block;
-      font-size: 14px;
-      color: var(--muted);
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
-    .form-input, .form-select {
-      width: 100%;
-      padding: 12px 14px;
-      border-radius: 12px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 16px;
-    }
-    .form-input:focus, .form-select:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    .order-type-group {
-      display: flex;
-      gap: 12px;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
-    }
-    .order-type-btn {
-      flex: 1;
-      min-width: 100px;
-      padding: 12px;
-      border-radius: 12px;
-      background: var(--card);
-      border: 2px solid var(--border);
-      color: var(--text);
-      font-weight: 600;
-      cursor: pointer;
-      text-align: center;
-      transition: var(--transition);
-    }
-    .order-type-btn.active {
-      border-color: var(--accent);
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--accent);
-    }
-    .hidden {
-      display: none !important;
-    }
-    .modal-footer {
-      padding: 16px 24px 24px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-    .btn-primary-large {
-      padding: 16px;
-      font-size: 18px;
-      font-weight: 700;
-      width: 100%;
-      border-radius: 12px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .btn-primary-large:hover {
-      background: #0da271;
-      transform: translateY(-2px);
-    }
-    .btn-secondary-small {
-      padding: 8px 12px;
-      font-size: 14px;
-      width: auto;
-      margin: 0 auto;
-      border-radius: 8px;
-      background: var(--card);
-      color: var(--text);
-      border: 1px solid var(--border);
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .btn-secondary-small:hover {
-      background: rgba(16, 185, 129, 0.1);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    .meal-modal {
-      background: var(--card);
-      border-radius: 20px;
-      width: 95%;
-      max-width: 500px;
-      max-height: 90vh;
-      display: flex;
-      flex-direction: column;
-      transform: scale(0.9);
-      opacity: 0;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-    }
-    .modal-overlay.active .meal-modal {
-      transform: scale(1);
-      opacity: 1;
-    }
-    .meal-modal-image {
-      width: 100%;
-      height: 250px;
-      object-fit: cover;
-      border-radius: 16px 16px 0 0;
-    }
-    .meal-modal-content {
-      padding: 24px;
-    }
-    .meal-modal-title {
-      font-size: 24px;
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
-    .meal-modal-description {
-      color: var(--muted);
-      margin-bottom: 16px;
-      line-height: 1.5;
-    }
-    .meal-modal-price {
-      color: var(--accent);
-      font-weight: 700;
-      font-size: 20px;
-      margin-bottom: 20px;
-    }
-    .social-icons {
-      display: flex;
-      justify-content: center;
-      gap: 20px;
-    }
-    .social-icon img {
-      width: 30px;
-      height: 30px;
-      object-fit: contain;
-      transition: transform 0.2s ease, opacity 0.2s ease;
-    }
-    .social-icon img:hover {
-      transform: scale(1.15);
-      opacity: 0.8;
-    }
-    #mealModalOrderBtn {
-      width: 100%;
-      padding: 14px;
-      border-radius: 12px;
-      background: var(--accent);
-      color: white;
-      border: none;
-      font-weight: 700;
-      font-size: 17px;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    #mealModalOrderBtn:hover {
-      background: #0da271;
-      transform: translateY(-2px);
-    }
-    .menu-root { padding: 20px 0; }
-    .category-section { margin-bottom: 36px; }
-    .floating-cart {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--accent);
-      color: white;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: none;
-      cursor: pointer;
-      box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
-      z-index: 999;
-      transition: var(--transition);
-    }
-    .floating-cart:hover {
-      transform: scale(1.08);
-      box-shadow: 0 8px 28px rgba(16, 185, 129, 0.6);
-    }
-    .cart-count {
-      position: absolute;
-      top: -2px;
-      right: -2px;
-      background: #ef4444;
-      color: white;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      font-size: 11px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      animation: bounce 0.5s;
-    }
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-      40% { transform: translateY(-5px); }
-      60% { transform: translateY(-3px); }
-    }
-    footer {
-      margin-top: 50px;
-      padding: 24px 0;
-      text-align: center;
-      border-top: 1px solid var(--border);
-    }
-    .footer-text {
-      color: var(--muted);
-      margin-bottom: 16px;
-      font-size: 14px;
-    }
-    .social-icon {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-decoration: none;
-      font-size: 16px;
-      transition: var(--transition);
-    }
-    .social-icon:hover {
-      background: var(--accent);
-      color: white;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-    }
-    .loading, .empty-state {
-      text-align: center;
-      padding: 40px 0;
-      color: var(--muted);
-      font-size: 16px;
-    }
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%) translateY(100px);
-      background: var(--card);
-      color: var(--text);
-      padding: 12px 20px;
-      border-radius: 12px;
-      border: 1px solid var(--border);
-      box-shadow: 0 6px 20px var(--shadow);
-      z-index: 2000;
-      opacity: 0;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-      backdrop-filter: blur(10px);
-      background: rgba(26, 34, 38, 0.8);
-    }
-    .toast.show {
-      transform: translateX(-50%) translateY(0);
-      opacity: 1;
-    }
-    .toast.success { border-left: 4px solid var(--accent); }
-    .toast.error { border-left: 4px solid #ef4444; }
-    .toast.warning { border-left: 4px solid #f59e0b; }
-    .toast.info { border-left: 4px solid #3b82f6; }
-    .confirm-modal {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: var(--overlay);
-      backdrop-filter: blur(10px);
-      display: none;
-      z-index: 1001;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .confirm-modal.active {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 1;
-    }
-    .confirm-content {
-      background: var(--card);
-      border-radius: 16px;
-      padding: 24px;
-      max-width: 400px;
-      width: 90%;
-      text-align: center;
-      backdrop-filter: blur(10px);
-      background: rgba(26, 34, 38, 0.8);
-    }
-    .confirm-message {
-      margin-bottom: 20px;
-      font-size: 16px;
-    }
-    .confirm-buttons {
-      display: flex;
-      gap: 12px;
-      justify-content: center;
-    }
-    .category-title {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin: 32px 0 20px;
-      text-align: center;
-      color: var(--accent);
-      border-bottom: 2px solid var(--accent);
-      padding-bottom: 8px;
+    .form-group{margin-bottom:20px;position:relative}
+    .form-label{display:block;font-size:14px;color:var(--muted);margin-bottom:8px;font-weight:500}
+    .form-input{width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--border);background:transparent;color:var(--text);font-size:16px;transition:all 0.2s}
+    .form-input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(16,185,129,0.2)}
+    .form-input.error{border-color:var(--danger)}
+    .toggle-password{position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--muted);cursor:pointer;font-size:18px}
+    
+    .form-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;font-size:14px}
+    .remember-me{display:flex;align-items:center;gap:8px}
+    .remember-me input{width:auto}
+    .forgot-password{color:var(--accent);text-decoration:none}
+    .forgot-password:hover{text-decoration:underline}
+    
+    .btn{width:100%;padding:14px;border-radius:12px;border:none;font-weight:600;font-size:16px;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+    .btn::after{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,0.3);border-radius:50%;transform:translate(-50%,-50%);transition:width 0.6s,height 0.6s}
+    .btn:active::after{width:300px;height:300px}
+    .btn-primary{background:var(--accent);color:white}
+    .btn-primary:hover{background:#0da271}
+    .btn-primary:disabled{opacity:0.7;cursor:not-allowed}
+    .btn-primary.loading{position:relative;padding-right:40px}
+    .spinner{display:inline-block;width:16px;height:16px;border:2px solid transparent;border-top-color:white;border-radius:50%;animation:spin 1s linear infinite;margin-left:8px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    
+    .login-footer{text-align:center;margin-top:24px;color:var(--muted);font-size:13px;padding-top:24px;border-top:1px solid var(--border)}
+    
+    .toast-container{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);z-index:1000}
+    .toast{padding:12px 20px;border-radius:12px;background:var(--card);border:1px solid var(--border);box-shadow:0 6px 20px rgba(0,0,0,0.3);margin-bottom:10px;opacity:0;transform:translateY(20px);animation:slideInUp 0.3s forwards, fadeOut 0.3s 2.7s forwards}
+    @keyframes slideInUp{to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeOut{to{opacity:0;transform:translateY(-20px)}}
+    .toast.success{border-left:4px solid var(--success)}
+    .toast.error{border-left:4px solid var(--danger)}
+    .toast.info{border-left:4px solid var(--accent)}
+    .toast.warning{border-left:4px solid #f59e0b}
+    
+    .shake{animation:shake 0.5s}
+    @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+    
+    @media (max-width:480px){
+      .login-card{padding:32px;width:90%;}
+      .login-header h1{font-size:24px}
     }
   </style>
 </head>
 <body data-theme="dark">
-  <div class="wrap">
-    <header>
-      <div>
-        <h1>Menu 🍝</h1>
-        <div class="header-subtitle">Order hot meals — Dine-in • Takeaway</div>
+  <div class="login-container">
+    <div class="login-card" id="loginCard">
+      <div class="login-header">
+        <h1>Admin</h1>
+        <p>Secure access to your dashboard</p>
       </div>
-      <div style="display: flex; gap: 12px; align-items: center;">
-        <button id="theme" class="theme-btn">☀️</button>
-        <button id="openCartTop" class="cart-top-btn">🛒<span id="cartCountTop" class="cart-count-top">0</span></button>
-      </div>
-    </header>
-    <input id="searchBox" class="search-box" placeholder="Search meals..." />
-    <div class="category-tabs" id="categoryTabs">
-      <button class="category-tab active" data-category="all">All Items</button>
-    </div>
-    <div id="loading" class="loading">Loading meals…</div>
-    <div id="mealsContainer" class="menu-root"></div>
-  </div>
-
-  <!-- Cart Modal -->
-  <div id="cartModal" class="modal-overlay">
-    <div class="cart-modal">
-      <div class="modal-header">
-        <h2>Your Order</h2>
-        <button id="closeCart" class="close-modal">×</button>
-      </div>
-      <div class="modal-body">
-        <div id="cartItems" class="cart-items"></div>
-        <div id="cartBreakdown" class="cart-breakdown"></div>
+      
+      <form id="loginForm">
         <div class="form-group">
-          <label class="form-label">Order Type</label>
-          <div class="order-type-group">
-            <button type="button" class="order-type-btn active" data-type="dinein">Dine-in</button>
-            <button type="button" class="order-type-btn" data-type="takeaway">Takeaway</button>
-          </div>
+          <label for="loginUsername" class="form-label">Username</label>
+          <input id="loginUsername" name="username" autocomplete="username" class="form-input" required />
+          <div class="error-message" id="usernameError" style="color:var(--danger);font-size:12px;margin-top:4px;display:none;"></div>
         </div>
-        <div id="dineinFields" class="form-group">
-          <label class="form-label">Table Number</label>
-          <input id="tableNo" class="form-input" placeholder="Enter table number" />
-        </div>
+        
         <div class="form-group">
-          <label class="form-label">Full Name</label>
-          <input id="custName" class="form-input" placeholder="Enter your name" />
+          <label for="loginPassword" class="form-label">Password</label>
+          <input id="loginPassword" name="password" type="password" autocomplete="current-password" class="form-input" required />
+          <span class="toggle-password" id="togglePassword">👁️</span>
+          <div class="error-message" id="passwordError" style="color:var(--danger);font-size:12px;margin-top:4px;display:none;"></div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Payment Method</label>
-          <select id="paymentMethod" class="form-select">
-            <option value="cash">Cash/POS</option>
-            <option value="transfer">Bank Transfer</option>
-          </select>
+        
+        <div class="form-row">
+          <label class="remember-me">
+            <input type="checkbox" id="rememberMe" />
+            Remember me
+          </label>
+          <a href="#" class="forgot-password">Forgot password?</a>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button id="placeOrder" class="btn-primary-large">Place Order</button>
-        <button id="clearCart" class="btn-secondary-small">Clear Cart</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Meal Detail Modal -->
-  <div id="mealDetailModal" class="modal-overlay">
-    <div class="meal-modal">
-      <img id="mealModalImage" class="meal-modal-image" src="" alt="">
-      <div class="meal-modal-content">
-        <h3 id="mealModalTitle" class="meal-modal-title"></h3>
-        <p id="mealModalDescription" class="meal-modal-description"></p>
-        <div id="mealModalPrice" class="meal-modal-price"></div>
-        <button id="mealModalOrderBtn">Add to Cart</button>
+        
+        <button type="submit" class="btn btn-primary" id="loginBtn">
+          Sign in
+        </button>
+      </form>
+      
+      <div class="login-footer">
+        © 2025 PixelPunch — Secure Access Only
       </div>
     </div>
   </div>
+  
+  <div class="toast-container" id="toastContainer"></div>
 
-  <!-- Floating Cart Button -->
-  <button id="openCart" class="floating-cart">
-    🛒
-    <span id="cartCount" class="cart-count">0</span>
-  </button>
-
-  <!-- Toast Notification -->
-  <div id="toast" class="toast"></div>
-
-  <!-- Confirm Modal -->
-  <div id="confirmModal" class="confirm-modal">
-    <div class="confirm-content">
-      <div class="confirm-message" id="confirmMessage">Are you sure you want to clear your cart?</div>
-      <div class="confirm-buttons">
-        <button id="confirmNo" class="btn-secondary-small">Cancel</button>
-        <button id="confirmYes" class="btn-secondary-small">Clear</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Validation Error Modal -->
-<div id="validationModal" class="modal-overlay">
-  <div class="cart-modal" style="max-width: 400px;">
-    <div class="modal-header">
-      <h2>Missing Information</h2>
-      <button class="close-modal" id="closeValidationModal">×</button>
-    </div>
-    <div class="modal-body" style="text-align: center; padding: 24px;">
-      <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
-      <div id="validationMessage" style="font-size: 16px; line-height: 1.5; color: var(--text);">
-        Please fill in all required fields.
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button id="fixValidation" class="btn-primary-large">Go Back</button>
-    </div>
-  </div>
-</div>
-
-  <!-- WhatsApp Confirm Modal -->
-  <div id="whatsappModal" class="modal-overlay">
-    <div class="cart-modal">
-      <div class="modal-header">
-        <h2>Confirm Order</h2>
-        <button id="closeWhatsapp" class="close-modal">×</button>
-      </div>
-      <div class="modal-body" id="whatsappSummary"></div>
-      <div class="modal-footer">
-        <button id="confirmWhatsapp" class="btn-primary-large">Confirm & Send</button>
-        <button id="cancelWhatsapp" class="btn-secondary-small">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Footer -->
-  <footer>
-    <div class="footer-text">Follow us on social media</div>
-    <div class="social-icons">
-      <a href="https://facebook.com" target="_blank" rel="noopener" class="social-icon">
-        <img src="https://i.ibb.co/359TBTT1/icons8-facebook-50.png" alt="Facebook">
-      </a>
-      <a href="https://instagram.com" target="_blank" rel="noopener" class="social-icon">
-        <img src="https://i.ibb.co/pjmLjGzC/icons8-instagram-50.png" alt="Instagram">
-      </a>
-      <a href="https://tiktok.com" target="_blank" rel="noopener" class="social-icon">
-        <img src="https://i.ibb.co/qLXRQjhH/icons8-tiktok-50.png" alt="TikTok">
-      </a>
-    </div>
-  </footer>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
 <script>
-/* ===========================
-   ✅ SUPABASE INITIALIZATION
-=========================== */
-const SUPABASE_URL = 'https://tbnjvmibyzeqmgnaavpc.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_GfSPdiJgIXfURhNDREfPEw_1uNQvT46';
+/* ================== Supabase config (user-provided) ================== */
+const SUPABASE_URL = "https://tbnjvmibyzeqmgnaavpc.supabase.co";
+const SUPABASE_KEY = "sb_publishable_GfSPdiJgIXfURhNDREfPEw_1uNQvT46";
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+/* ==================================================================== */
 
-/* ===========================
-   ✅ DOM & STATE
-=========================== */
-const mealsContainer = document.getElementById('mealsContainer');
-const loading = document.getElementById('loading');
-const categoryTabs = document.getElementById('categoryTabs');
-const searchBox = document.getElementById('searchBox');
-const themeBtn = document.getElementById('theme');
-const toast = document.getElementById('toast');
-const toastMessage = document.getElementById('toastMessage');
+/* DOM refs */
+const loginForm = document.getElementById('loginForm');
+const loginUsername = document.getElementById('loginUsername');
+const loginPassword = document.getElementById('loginPassword');
+const loginBtn = document.getElementById('loginBtn');
+const togglePassword = document.getElementById('togglePassword');
+const rememberMe = document.getElementById('rememberMe');
+const toastContainer = document.getElementById('toastContainer');
+const loginCard = document.getElementById('loginCard');
 
-let meals = [];
-let currentCategory = 'all';
-let cart = JSON.parse(localStorage.getItem('cart_v1') || '[]');
-let currentMeal = null;
-let currentOrderType = 'dinein';
-
-/* ===========================
-   ✅ TOAST
-=========================== */
-function showToast(message, type = 'info') {
-  toastMessage.textContent = message;
-  toast.className = 'toast ' + type;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
+/* Theme handling */
+function initTheme(){
+  const chosen = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', chosen==='light' ? 'light' : 'dark');
 }
-
-/* ===========================
-   ✅ PLACE ORDER VALIDATION
-=========================== */
-document.getElementById('placeOrder').addEventListener('click', async () => {
-  // 1. Check if cart is empty
-  if (cart.length === 0) {
-    closeCartModal();
-    showToast('Empty cart. Add meals to order.', 'warning');
-    return;
-  }
-
-  // 2. Get form values
-  const customerName = document.getElementById('custName').value.trim();
-  const tableNumber = currentOrderType === 'dinein' 
-    ? document.getElementById('tableNo').value.trim() 
-    : null;
-
-  // 3. Validate required fields
-  if (!customerName) {
-    showValidationPopup('Enter your name.');
-    return;
-  }
-
-  if (currentOrderType === 'dinein' && !tableNumber) {
-    showValidationPopup('Table number required. Dine-in Order.');
-    return;
-  }
-
-  // ✅ All validations passed — proceed to order submission
-  const paymentMethod = document.getElementById('paymentMethod').value;
-  const items = cart.map(i => ({
-    id: i.id,
-    name: i.name,
-    quantity: i.quantity,
-    unitPrice: i.price
-  }));
-  const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
-  const total = subtotal;
-
-  const ORDER_TYPES_DB = {
-    dinein: 'dine-in',
-    takeaway: 'takeaway'
-  };
-
-  const order = {
-    customer_name: customerName,
-    order_type: ORDER_TYPES_DB[currentOrderType],
-    items: JSON.stringify(items),
-    total_amount: total,
-    payment_method: paymentMethod,
-    status: 'pending',
-    table_number: tableNumber || null,
-    created_at: new Date().toISOString()
-  };
-
-  try {
-    const { error } = await supabase.from('orders').insert([order]);
-    if (error) throw error;
-    showWhatsappConfirm(order);
-  } catch (err) {
-    console.error('Order submission error:', err);
-    showToast('Failed to save order: ' + (err.message || 'Unknown error'), 'error');
-  }
-});
-
-// Show validation popup
-function showValidationPopup(message) {
-  document.getElementById('validationMessage').textContent = message;
-  document.getElementById('validationModal').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-
-/* ===========================
-   ✅ THEME TOGGLE
-=========================== */
-function initTheme() {
-  const t = localStorage.getItem('theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', t);
-  themeBtn.textContent = t === 'light' ? '🌙' : '☀️';
-}
-
-// Initialize on load
 initTheme();
 
-// Add click listener to toggle
-themeBtn.addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'light' ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-  themeBtn.textContent = next === 'light' ? '🌙' : '☀️';
-});
-
-// Close validation popup
-function closeValidationPopup() {
-  document.getElementById('validationModal').classList.remove('active');
-  document.body.style.overflow = '';
+/* Toast notifications */
+function showToast(message, type = 'info') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  toastContainer.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
 }
 
-// Attach event listeners for validation modal
-document.getElementById('closeValidationModal').addEventListener('click', closeValidationPopup);
-document.getElementById('fixValidation').addEventListener('click', closeValidationPopup);
-document.getElementById('validationModal').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('validationModal')) {
-    closeValidationPopup();
-  }
+/* Password toggle */
+let passwordVisible = false;
+togglePassword.addEventListener('click', () => {
+  passwordVisible = !passwordVisible;
+  loginPassword.type = passwordVisible ? 'text' : 'password';
+  togglePassword.textContent = passwordVisible ? '🙈' : '👁️';
 });
 
-// Rest of the code remains the same (loadMeals, render, cart functions, etc.)
-// For brevity, only the validation logic is shown fully.
-// The rest of the implementation follows the structure from your original file.
-
-/* ===========================
-   ✅ INITIALIZE (partial)
-=========================== */
-async function loadMeals() {
-  loading.style.display = 'block';
-  try {
-    const { data, error } = await supabase
-      .from('meals')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-    meals = (data || []).map(m => ({ ...m, archived: Boolean(m.archived) }));
-    renderMealsByCategory(meals);
-  } catch (err) {
-    console.error('Error loading meals:', err);
-    mealsContainer.innerHTML = `<div class="empty-state">Failed to load meals.</div>`;
-  } finally {
-    loading.style.display = 'none';
+/* Form validation */
+function validateForm() {
+  const username = loginUsername.value.trim();
+  const password = loginPassword.value;
+  let isValid = true;
+  
+  // Reset errors
+  loginUsername.classList.remove('error');
+  loginPassword.classList.remove('error');
+  document.getElementById('usernameError').style.display = 'none';
+  document.getElementById('passwordError').style.display = 'none';
+  
+  if (!username) {
+    loginUsername.classList.add('error');
+    document.getElementById('usernameError').textContent = 'Username is required';
+    document.getElementById('usernameError').style.display = 'block';
+    isValid = false;
   }
+  
+  if (!password) {
+    loginPassword.classList.add('error');
+    document.getElementById('passwordError').textContent = 'Password is required';
+    document.getElementById('passwordError').style.display = 'block';
+    isValid = false;
+  }
+  
+  return isValid;
 }
 
-function renderMealsByCategory(list) {
-  if (!list.length) {
-    mealsContainer.innerHTML = `<div class="empty-state">No meals available.</div>`;
+/* Remember me functionality */
+// Load remembered username
+const rememberedUsername = localStorage.getItem('admin_username');
+if (rememberedUsername) {
+  loginUsername.value = rememberedUsername;
+  rememberMe.checked = true;
+}
+
+/* Login form submission */
+loginForm.addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  
+  if (!validateForm()) {
     return;
   }
-  const categories = ['Main Course', 'Fast Food', 'Drinks & Beverages', 'Snacks & Sides', 'Desserts'];
-  let html = '';
-  if (currentCategory === 'all') {
-    categories.forEach(cat => {
-      const group = list.filter(m => m.category === cat);
-      if (group.length > 0) {
-        const available = group.filter(m => !m.archived);
-        const unavailable = group.filter(m => m.archived);
-        const allInOrder = [...available, ...unavailable];
-        html += `<h2 class="category-title">${cat}</h2><div class="meals-grid">${allInOrder.map(createMealCard).join('')}</div>`;
-      }
-    });
+  
+  const username = loginUsername.value.trim();
+  const password = loginPassword.value;
+  
+  // Save username if remember me is checked
+  if (rememberMe.checked) {
+    localStorage.setItem('admin_username', username);
   } else {
-    const filtered = list.filter(m => m.category === currentCategory);
-    const available = filtered.filter(m => !m.archived);
-    const unavailable = filtered.filter(m => m.archived);
-    const allInOrder = [...available, ...unavailable];
-    html += `<div class="meals-grid">${allInOrder.map(createMealCard).join('')}</div>`;
+    localStorage.removeItem('admin_username');
   }
-  mealsContainer.innerHTML = html;
-  attachMealListeners();
-}
-
-function createMealCard(meal) {
-  const isUnavailable = meal.archived;
-  return `
-    <div class="meal-card ${isUnavailable ? 'unavailable' : ''}" data-id="${meal.id}">
-      ${isUnavailable ? '<div class="unavailable-badge">Unavailable</div>' : ''}
-      <img src="${meal.image_url || 'https://placehold.co/600x400?text=Meal'}" class="meal-image" alt="${meal.name}">
-      <div class="meal-info">
-        <div class="meal-title">${escapeHtml(meal.name)}</div>
-        <div class="meal-description">${escapeHtml(meal.description || '')}</div>
-        <div class="meal-price">₦${Number(meal.price || 0).toLocaleString()}</div>
-        <button class="btn-order ${isUnavailable ? 'unavailable' : ''}" ${isUnavailable ? 'disabled' : ''} data-id="${meal.id}">
-          ${isUnavailable ? 'Unavailable' : 'Order'}
-        </button>
-      </div>
-    </div>
-  `;
-}
-
-function attachMealListeners() {
-  document.querySelectorAll('.meal-card').forEach(card => {
-    card.addEventListener('click', (e) => {
-      if (e.target.closest('.btn-order')) return;
-      const id = card.dataset.id;
-      const meal = meals.find(m => m.id === id);
-      if (meal && !meal.archived) openMealDetailModal(meal);
-    });
-  });
-
-  document.querySelectorAll('.btn-order:not(.unavailable)').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const meal = meals.find(m => m.id === btn.dataset.id);
-      if (meal) {
-        addToCart({ id: meal.id, name: meal.name, price: Number(meal.price || 0), image_url: meal.image_url, description: meal.description, quantity: 1 });
-        showToast('Added to cart', 'success');
-      }
-    });
-  });
-}
-
-function openMealDetailModal(meal) {
-  currentMeal = meal;
-  document.getElementById('mealModalImage').src = meal.image_url || 'https://placehold.co/600x400?text=Delicious+Meal';
-  document.getElementById('mealModalTitle').textContent = meal.name;
-  document.getElementById('mealModalDescription').textContent = meal.description || 'Delicious meal prepared with care.';
-  document.getElementById('mealModalPrice').textContent = `₦${Number(meal.price || 0).toLocaleString()}`;
-  document.getElementById('mealDetailModal').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-function closeMealDetailModal() {
-  document.getElementById('mealDetailModal').classList.remove('active');
-  document.body.style.overflow = '';
-  currentMeal = null;
-}
-document.getElementById('mealDetailModal').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('mealDetailModal')) closeMealDetailModal();
-});
-document.querySelector('#mealDetailModal .close-modal')?.addEventListener('click', closeMealDetailModal);
-document.getElementById('mealModalOrderBtn').addEventListener('click', () => {
-  if (currentMeal && !currentMeal.archived) {
-    addToCart({ 
-      id: currentMeal.id, 
-      name: currentMeal.name, 
-      price: Number(currentMeal.price || 0), 
-      image_url: currentMeal.image_url, 
-      description: currentMeal.description,
-      quantity: 1 
-    });
-    closeMealDetailModal();
-    showToast('Added to cart', 'success');
-  }
-});
-
-function addToCart(item) {
-  const existing = cart.find(c => c.id === item.id);
-  if (existing) existing.quantity += item.quantity;
-  else cart.push(item);
-  persistCart();
-  updateCartUI();
-}
-function persistCart() {
-  localStorage.setItem('cart_v1', JSON.stringify(cart));
-}
-function updateCartUI() {
-  const count = cart.reduce((sum, i) => sum + i.quantity, 0);
-  document.getElementById('cartCount').textContent = count;
-  document.getElementById('cartCountTop').textContent = count;
-  if (cart.length === 0) {
-    document.getElementById('cartItems').innerHTML = '<div style="text-align:center;padding:30px 0;color:var(--muted);">Your cart is empty</div>';
-    document.getElementById('cartBreakdown').innerHTML = '';
-    return;
-  }
-  document.getElementById('cartItems').innerHTML = cart.map(i => `
-    <div class="cart-item">
-      <img src="${i.image_url || 'https://placehold.co/50x50?text=Meal'}" alt="${i.name}">
-      <div class="cart-item-info">
-        <div class="cart-item-name">${escapeHtml(i.name)}</div>
-        <div class="cart-item-price">₦${Number(i.price).toLocaleString()} each</div>
-        <div class="cart-item-controls">
-          <button class="quantity-btn" data-id="${i.id}" data-op="-">−</button>
-          <span style="min-width:20px;text-align:center;">${i.quantity}</span>
-          <button class="quantity-btn" data-id="${i.id}" data-op="+">+</button>
-          <button class="quantity-btn" data-id="${i.id}" data-op="r" style="margin-left:6px;">🗑️</button>
-        </div>
-      </div>
-      <div class="cart-item-total">₦${(i.price * i.quantity).toLocaleString()}</div>
-    </div>
-  `).join('');
-  document.querySelectorAll('.quantity-btn').forEach(b => {
-    b.addEventListener('click', e => {
-      const id = b.dataset.id;
-      const op = b.dataset.op;
-      if (op === '+') updateQuantity(id, 1);
-      else if (op === '-') updateQuantity(id, -1);
-      else removeFromCart(id);
-    });
-  });
-  const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
-  const total = subtotal;
-  document.getElementById('cartBreakdown').innerHTML = `
-    <div class="breakdown-row">
-      <span>Subtotal:</span>
-      <span>₦${subtotal.toLocaleString()}</span>
-    </div>
-    <div class="breakdown-total">
-      <span>TOTAL:</span>
-      <span>₦${total.toLocaleString()}</span>
-    </div>
-  `;
-}
-
-function updateQuantity(id, delta) {
-  const item = cart.find(c => c.id === id);
-  if (!item) return;
-  item.quantity += delta;
-  if (item.quantity <= 0) cart = cart.filter(c => c.id !== id);
-  persistCart();
-  updateCartUI();
-}
-function removeFromCart(id) {
-  cart = cart.filter(c => c.id !== id);
-  persistCart();
-  updateCartUI();
-}
-function clearCartFn() {
-  cart = [];
-  persistCart();
-  updateCartUI();
-}
-
-function openCartModal() {
-  document.getElementById('cartModal').classList.add('active');
-  document.body.style.overflow = 'hidden';
-}
-function closeCartModal() {
-  document.getElementById('cartModal').classList.remove('active');
-  document.body.style.overflow = '';
-}
-document.getElementById('openCart').addEventListener('click', openCartModal);
-document.getElementById('openCartTop').addEventListener('click', openCartModal);
-document.getElementById('closeCart').addEventListener('click', closeCartModal);
-document.getElementById('cartModal').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('cartModal')) closeCartModal();
-});
-
-document.querySelectorAll('.order-type-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.order-type-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    currentOrderType = btn.dataset.type;
-    if (currentOrderType === 'dinein') {
-      document.getElementById('dineinFields').classList.remove('hidden');
-    } else {
-      document.getElementById('dineinFields').classList.add('hidden');
+  
+  // Show loading state
+  loginBtn.innerHTML = 'Signing in <div class="spinner"></div>';
+  loginBtn.disabled = true;
+  loginBtn.classList.add('loading');
+  
+  try {
+    // 🔹 Keep existing Supabase logic intact
+    const { data, error } = await supabase.from('users').select('id,username,role,password').eq('username', username).limit(1).single();
+    
+    if (error || !data) {
+      throw new Error('Invalid credentials');
     }
-  });
-});
-
-document.getElementById('clearCart').addEventListener('click', () => {
-  showConfirm('Are you sure you want to clear your cart?', () => {
-    clearCartFn();
-  });
-});
-
-function showConfirm(message, callback) {
-  document.getElementById('confirmMessage').textContent = message;
-  document.getElementById('confirmModal').classList.add('active');
-  window.confirmCallback = callback;
-}
-document.getElementById('confirmYes').addEventListener('click', () => {
-  if (window.confirmCallback) window.confirmCallback();
-  document.getElementById('confirmModal').classList.remove('active');
-  window.confirmCallback = null;
-});
-document.getElementById('confirmNo').addEventListener('click', () => {
-  document.getElementById('confirmModal').classList.remove('active');
-  window.confirmCallback = null;
-});
-document.getElementById('confirmModal').addEventListener('click', (e) => {
-  if (e.target === document.getElementById('confirmModal')) {
-    document.getElementById('confirmModal').classList.remove('active');
-    window.confirmCallback = null;
-  }
-});
-
-function showWhatsappConfirm(orderData) {
-  let items = orderData.items;
-  if (typeof items === 'string') {
-    try {
-      items = JSON.parse(items);
-    } catch (e) {
-      console.error('Failed to parse items:', e);
-      items = [];
+    
+    // 🔹 Compare password with stored hash (plaintext comparison as per original logic)
+    if (data.password !== password) {
+      throw new Error('Invalid credentials');
     }
+    
+    // Success - save session and redirect
+    localStorage.setItem('admin_logged_in', 'true');
+    localStorage.setItem('admin_user', JSON.stringify({ id: data.id, username: data.username }));
+    
+    showToast('Login successful!', 'success');
+    
+    // Smooth fade out and redirect
+    loginCard.style.opacity = '0';
+    loginCard.style.transform = 'scale(0.95)';
+    setTimeout(() => {
+      window.location.href = "/dashboard";
+    }, 300);
+    
+  } catch (err) {
+    console.error(err);
+    showToast('Invalid username or password', 'error');
+    
+    // Shake animation on error
+    loginCard.classList.add('shake');
+    setTimeout(() => {
+      loginCard.classList.remove('shake');
+    }, 500);
+    
+    // Reset button state
+    loginBtn.innerHTML = 'Sign in';
+    loginBtn.disabled = false;
+    loginBtn.classList.remove('loading');
   }
-  let itemsHtml = '';
-  if (Array.isArray(items)) {
-    itemsHtml = items.map(item => 
-      `<div>• ${item.name} x${item.quantity} - ₦${(item.unitPrice * item.quantity).toLocaleString()}</div>`
-    ).join('');
-  }
-  document.getElementById('whatsappSummary').innerHTML = `
-    <div><strong>Customer:</strong> ${orderData.customer_name || 'N/A'}</div>
-    <div><strong>Type:</strong> ${orderData.order_type || 'N/A'}</div>
-    ${orderData.table_number ? `<div><strong>Table:</strong> ${orderData.table_number}</div>` : ''}
-    <div><strong>Payment:</strong> ${orderData.payment_method === 'transfer' ? 'Bank Transfer' : 'Cash/POS'}</div>
-    <div style="margin: 12px 0;"><strong>Items:</strong></div>
-    ${itemsHtml}
-    <div style="margin-top: 12px;"><strong>Total:</strong> ₦${Number(orderData.total_amount || 0).toLocaleString()}</div>
-    <div style="margin-top: 8px; color: var(--muted);">This will open WhatsApp to send your order to the restaurant.</div>
-  `;
-  document.getElementById('whatsappModal').classList.add('active');
-}
-document.getElementById('closeWhatsapp').addEventListener('click', () => {
-  document.getElementById('whatsappModal').classList.remove('active');
-});
-document.getElementById('cancelWhatsapp').addEventListener('click', () => {
-  document.getElementById('whatsappModal').classList.remove('active');
-});
-document.getElementById('confirmWhatsapp').addEventListener('click', () => {
-  const customerName = document.getElementById('custName').value.trim();
-  const tableNumber = currentOrderType === 'dinein' ? document.getElementById('tableNo').value.trim() : null;
-  const paymentMethod = document.getElementById('paymentMethod').value;
-  const items = cart.map(i => ({
-    id: i.id,
-    name: i.name,
-    quantity: i.quantity,
-    unitPrice: i.price
-  }));
-  const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
-  const total = subtotal;
-  const ORDER_TYPES_HUMAN = {
-    dinein: 'Dine-in',
-    takeaway: 'Takeaway'
-  };
-  let waMessage = `🛍️ NEW ORDER
-Name: ${customerName}
-Type: ${ORDER_TYPES_HUMAN[currentOrderType]}`;
-  if (tableNumber) waMessage += `
-Table: ${tableNumber}`;
-  waMessage += `
-Payment: ${paymentMethod === 'transfer' ? 'Bank Transfer' : 'Cash/POS'}`;
-  waMessage += `
-Items:
-${items.map(it => `• ${it.name} x${it.quantity}`).join('\n')}`;
-  waMessage += `
-Total: ₦${total.toLocaleString()}`;
-  window.open(`https://wa.me/2348075640610?text=${encodeURIComponent(waMessage)}`, '_blank');
-  cart = [];
-  persistCart();
-  updateCartUI();
-  closeCartModal();
-  document.getElementById('whatsappModal').classList.remove('active');
-  showToast('Order placed! WhatsApp opened.', 'success');
 });
 
-function escapeHtml(str) {
-  return str
-    ? str.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '<', '>': '>', '"': '&quot;', "'": '&#39;' }[c]))
-    : '';
+// Enable/disable login button based on form validity
+function updateLoginButtonState() {
+  const username = loginUsername.value.trim();
+  const password = loginPassword.value;
+  loginBtn.disabled = !(username && password);
 }
 
-searchBox.addEventListener('input', () => {
-  const q = searchBox.value.toLowerCase().trim();
-  const filtered = meals.filter(m => !q || (m.name && m.name.toLowerCase().includes(q)));
-  const visible = currentCategory === 'all' ? filtered : filtered.filter(m => m.category === currentCategory);
-  const available = visible.filter(m => !m.archived);
-  const unavailable = visible.filter(m => m.archived);
-  const allInOrder = [...available, ...unavailable];
-  const html = `<div class="meals-grid">${allInOrder.map(createMealCard).join('')}</div>`;
-  mealsContainer.innerHTML = html;
-  attachMealListeners();
-});
-
-document.addEventListener('DOMContentLoaded', async () => {
-  await loadMeals();
-  updateCartUI();
-  currentOrderType = 'dinein';
-  document.querySelectorAll('.order-type-btn').forEach(btn => {
-    if (btn.dataset.type === 'dinein') {
-      btn.classList.add('active');
-    }
-  });
-});
+loginUsername.addEventListener('input', updateLoginButtonState);
+loginPassword.addEventListener('input', updateLoginButtonState);
+updateLoginButtonState();
 </script>
 </body>
 </html>
