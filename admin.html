@@ -24,22 +24,22 @@
       --card:#0f1417;
       --muted:#9aa6ad;
       --text:#e6eef3;
-      --accent:#10b981;
+      --accent:#f37100;
       --danger:#ef4444;
       --border:rgba(255,255,255,0.06);
       --glass: rgba(255,255,255,0.02);
-      --success:#16a34a;
+      --success:#d56503;
     }
     [data-theme="light"]{
       --bg:#f7fafc;
       --card:#ffffff;
       --muted:#6b7280;
       --text:#0f1724;
-      --accent:#0ea5a3;
+      --accent:#f37100;
       --danger:#dc2626;
       --border:#e6eef2;
       --glass: rgba(0,0,0,0.03);
-      --success:#059669;
+      --success:#d66603;
     }
 
     *{box-sizing:border-box;margin:0;padding:0}
@@ -70,7 +70,7 @@
     .btn::after{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,0.3);border-radius:50%;transform:translate(-50%,-50%);transition:width 0.6s,height 0.6s}
     .btn:active::after{width:300px;height:300px}
     .btn-primary{background:var(--accent);color:white}
-    .btn-primary:hover{background:#0da271}
+    .btn-primary:hover{background:#f37100;}
     .btn-primary:disabled{opacity:0.7;cursor:not-allowed}
     .btn-primary.loading{position:relative;padding-right:40px}
     .spinner{display:inline-block;width:16px;height:16px;border:2px solid transparent;border-top-color:white;border-radius:50%;animation:spin 1s linear infinite;margin-left:8px}
@@ -141,9 +141,13 @@
 
 <script>
 /* ================== Supabase config (user-provided) ================== */
-const SUPABASE_URL = "https://tbnjvmibyzeqmgnaavpc.supabase.co";
-const SUPABASE_KEY = "sb_publishable_GfSPdiJgIXfURhNDREfPEw_1uNQvT46";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
+<script>
+  const SUPABASE_URL = 'https://tbnjvmibyzeqmgnaavpc.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_GfSPdiJgIXfURhNDREfPEw_1uNQvT46';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+
 /* ==================================================================== */
 
 /* DOM refs */
@@ -266,7 +270,7 @@ loginForm.addEventListener('submit', async (ev) => {
     loginCard.style.opacity = '0';
     loginCard.style.transform = 'scale(0.95)';
     setTimeout(() => {
-      window.location.href = "/dashboard";
+      window.location.href = 'dashboard.html';
     }, 300);
     
   } catch (err) {
