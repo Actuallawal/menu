@@ -1,20 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Admin Dashboard</title>
-  <!-- 🌟 Favicon & App Icons -->
   <link rel="icon" type="image/png" sizes="16x16" href="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png">
-  <link rel="icon" type="image/png" sizes="48x48" href="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png">
-  <link rel="shortcut icon" href="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png" type="image/png">
-  <meta name="theme-color" content="#000000">
-  <meta name="msapplication-TileImage" content="https://i.ibb.co/3Jh3Wzb/Artboard-1-copy-2.png">
-  <meta name="msapplication-TileColor" content="#000000">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
   <style>
     :root {
       --bg: #0c0f10;
@@ -24,755 +17,320 @@
       --accent: #f37100;
       --border: rgba(255,255,255,0.08);
       --overlay: rgba(0, 0, 0, 0.6);
-      --shadow: rgba(0, 0, 0, 0.3);
-      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --transition: all 0.22s cubic-bezier(.4,0,.2,1);
       --sidebar-width: 260px;
       --topbar-height: 70px;
+      --list-row-height: 96px;
     }
-    [data-theme="light"] {
-      --bg: #f5f7fa;
-      --card: #ffffff;
-      --text: #1e293b;
-      --muted: #64748b;
-      --accent: #f37100;
-      --border: #e2e8f0;
-      --overlay: rgba(0, 0, 0, 0.4);
-      --shadow: rgba(0, 0, 0, 0.1);
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:var(--bg); color:var(--text); -webkit-font-smoothing:antialiased;
     }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      line-height: 1.5;
-      transition: var(--transition);
-      overflow-x: hidden;
-    }
-    /* Layout */
-    .dashboard {
-      display: flex;
-      min-height: 100vh;
-    }
-    /* Top Bar */
-    .top-bar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: var(--topbar-height);
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      padding: 0 24px;
-      z-index: 100;
-      backdrop-filter: blur(10px);
-      background: rgba(22, 27, 30, 0.95);
-    }
-    .logo {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--accent);
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .logo-icon {
-      font-size: 28px;
-    }
-    .top-actions {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 20px;
-    }
-    .summary-stats {
-      display: flex;
-      gap: 20px;
-      color: var(--muted);
-      font-size: 14px;
-    }
-    .stat-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-    .stat-value {
-      font-weight: 700;
-      color: var(--text);
-      font-size: 18px;
-    }
-    .theme-btn, .logout-btn, .notifications-btn, .menu-toggle, .mute-btn {
-      width: 42px;
-      height: 42px;
-      border-radius: 12px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: var(--transition);
-      position: relative;
-    }
-    .notification-badge {
-      position: absolute;
-      top: -4px;
-      right: -4px;
-      background: #ef4444;
-      color: white;
-      width: 18px;
-      height: 18px;
-      border-radius: 50%;
-      font-size: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      display: none;
-    }
-    .theme-btn:hover, .logout-btn:hover, .notifications-btn:hover, .menu-toggle:hover, .mute-btn:hover {
-      background: rgba(16, 185, 129, 0.15);
-      transform: translateY(-2px);
-    }
-    /* Sidebar */
-    .sidebar {
+    /* Ensure mobile drawer is properly positioned and visible */
+    #mobileDrawer {
       width: var(--sidebar-width);
-      background: var(--card);
-      border-right: 1px solid var(--border);
-      padding: 24px 0;
-      display: flex;
-      flex-direction: column;
-      transition: var(--transition);
       height: calc(100vh - var(--topbar-height));
       position: fixed;
       top: var(--topbar-height);
       left: 0;
-      overflow-y: auto;
-    }
-    .nav-item {
-      padding: 16px 24px;
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      color: var(--muted);
-      text-decoration: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      border-radius: 0 30px 30px 0;
-      margin-right: 12px;
-    }
-    .nav-item:hover, .nav-item.active {
-      color: var(--accent);
-      background: rgba(16, 185, 129, 0.1);
-    }
-    .nav-icon {
-      font-size: 20px;
-      width: 24px;
-      text-align: center;
-    }
-    /* Main Content */
-    .main-content {
-      flex: 1;
-      margin-top: var(--topbar-height);
-      margin-left: var(--sidebar-width);
-      padding: 28px;
-      min-height: calc(100vh - var(--topbar-height));
-      margin-top: 60px;
-    }
-    .section {
-      display: none;
-    }
-    .section.active {
-      display: block;
-      animation: fadeIn 0.4s ease;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .section-header {
-      margin-bottom: 28px;
-      padding-bottom: 18px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 16px;
-    }
-    .section-title {
-      font-size: 26px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-    .btn {
-      padding: 12px 20px;
-      border-radius: 14px;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: var(--transition);
-      position: relative;
-      overflow: hidden;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      font-size: 15px;
-    }
-    .btn::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 0;
-      height: 0;
-      background: rgba(255, 255, 255, 0.3);
-      border-radius: 50%;
-      transform: translate(-50%, -50%);
-      transition: width 0.6s, height 0.6s;
-    }
-    .btn:active::after {
-      width: 300px;
-      height: 300px;
-    }
-    .btn-primary {
-      background: var(--accent);
-      color: white;
-    }
-    .btn-primary:hover {
-      background: #0da271;
-      transform: translateY(-2px);
-    }
-    .btn-outline {
-      background: transparent;
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-outline:hover {
-      background: rgba(16, 185, 129, 0.1);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
-    .btn-danger {
-      background: #ef4444;
-      color: white;
-    }
-    .btn-danger:hover {
-      background: #dc2626;
-    }
-    /* Orders */
-    .orders-grid {
-      display: grid;
-      gap: 20px;
-    }
-    .order-card {
+      z-index: 1000;
       background: var(--card);
-      border-radius: 18px;
-      padding: 24px;
-      border: 1px solid var(--border);
-      transition: var(--transition);
-      backdrop-filter: blur(10px);
-      background: rgba(22, 27, 30, 0.6);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .order-card:hover {
-      border-color: var(--accent);
-      box-shadow: 0 6px 16px rgba(0,0,0,0.15);
-    }
-    .order-header {
+      border-right: 1px solid var(--border);
+      padding: 18px;
       display: flex;
-      justify-content: space-between;
-      margin-bottom: 16px;
-      flex-wrap: wrap;
+      flex-direction: column;
       gap: 12px;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.5);
     }
-    .order-customer {
-      font-weight: 700;
-      font-size: 18px;
+    .drawer-hidden {
+      transform: translateX(-100%);
+      opacity: 0;
+      pointer-events: none;
+      transition: transform 0.3s ease, opacity 0.3s ease;
     }
-    .order-type {
-      background: rgba(16, 185, 129, 0.15);
-      color: var(--accent);
-      padding: 6px 12px;
-      border-radius: 30px;
-      font-size: 14px;
-      font-weight: 600;
+    .drawer-visible {
+      transform: translateX(0);
+      opacity: 1;
+      pointer-events: auto;
+      transition: transform 0.3s ease, opacity 0.3s ease;
     }
-    .order-amount {
-      font-weight: 700;
-      color: var(--accent);
-      font-size: 22px;
-      margin: 12px 0;
+    /* Top bar */
+    .top-bar{
+      height:var(--topbar-height);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      padding:0 18px;
+      border-bottom:1px solid var(--border);
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      position:sticky; top:0; z-index:60;
     }
+    .logo{display:flex;align-items:center;gap:10px;font-weight:700}
+    .logo .logo-icon{font-size:20px}
+    .top-actions{display:flex;align-items:center;gap:10px}
+    .top-actions > * { background:var(--card); border:1px solid var(--border); color:var(--text); padding:8px 10px; border-radius:10px; cursor:pointer; transition:var(--transition) }
+    .top-actions button:hover{ transform:translateY(-2px) }
+    /* Layout */
+    .layout{ display:flex; min-height:calc(100vh - var(--topbar-height)); }
+    /* Sidebar (desktop visible) */
+    .sidebar{
+      width:var(--sidebar-width);
+      min-width:var(--sidebar-width);
+      background:var(--card);
+      border-right:1px solid var(--border);
+      padding:18px;
+      display:flex;
+      flex-direction:column;
+      gap:12px;
+      transition: transform 0.28s ease;
+    }
+    .sidebar .nav-item{ display:flex; gap:10px; align-items:center; padding:10px; border-radius:10px; cursor:pointer; color:var(--muted) }
+    .sidebar .nav-item.active{ background:rgba(243,113,0,0.08); color:var(--accent); font-weight:700 }
+    .sidebar .nav-item:hover{ color:var(--text) }
+    /* Main content */
+    .main {
+      flex:1;
+      padding:18px;
+      overflow:auto;
+      min-height: calc(100vh - var(--topbar-height));
+    }
+    /* Stats area */
+    .stats {
+      display:flex;
+      gap:12px;
+      margin-bottom:14px;
+      align-items:center;
+      flex-wrap:wrap;
+    }
+    .stat-card {
+      background:linear-gradient(180deg, rgba(255,255,255,0.012), transparent);
+      border:1px solid var(--border);
+      padding:10px 14px;
+      border-radius:10px;
+      min-width:120px;
+      display:flex;
+      flex-direction:column;
+      gap:6px;
+    }
+    .export-controls {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--card);
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.date-input {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 14px;
+  padding: 4px 0;
+  min-width: 100px;
+}
+
+.date-separator {
+  color: var(--muted);
+  font-size: 16px;
+  font-weight: bold;
+}
+
+.export-btn {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+/* Mobile optimization */
+@media (max-width: 768px) {
+  .export-controls {
+    gap: 8px;
+  }
+  
+  .date-range {
+    padding: 4px 8px;
+    gap: 6px;
+  }
+  
+  .date-input {
+    font-size: 13px;
+    min-width: 80px;
+    padding: 2px 0;
+  }
+  
+  .date-separator {
+    font-size: 14px;
+  }
+  
+  .export-btn {
+    padding: 6px 12px;
+    font-size: 13px;
+  }
+}
+    .stat-title{ font-size:12px; color:var(--muted) }
+    .stat-number{ font-weight:800; font-size:18px }
+    /* Sections */
+    .section { display:none; }
+    .section.active { display:block; }
+    /* Meals list styles (vertical list view) */
+    .meals-list {
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .meal-row{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      background:var(--card);
+      border:1px solid var(--border);
+      padding:10px;
+      border-radius:10px;
+      height:var(--list-row-height);
+      min-height:var(--list-row-height);
+    }
+    .meal-row img { width:120px; height:72px; object-fit:cover; border-radius:8px; flex-shrink:0 }
+    .meal-body{ flex:1; display:flex; flex-direction:column; gap:6px; min-width:0 }
+    .meal-name{ font-weight:700; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
+    .meal-desc{ font-size:13px; color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+    .meal-meta{ display:flex; gap:12px; align-items:center; justify-content:space-between }
+    .meal-price{ color:var(--accent); font-weight:800 }
+    .meal-actions{ display:flex; gap:8px; align-items:center }
+    .btn { padding:8px 12px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text); cursor:pointer }
+    .btn:hover{ transform:translateY(-2px) }
+    .btn-primary{ background:linear-gradient(90deg,var(--accent), #ff8a3c); color:white; border:none }
+    .btn-danger{ background:transparent; color:#ef4444; border:1px solid rgba(239,68,68,0.15) }
+    /* Modal */
+    .modal-overlay{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:var(--overlay); z-index:200 }
+    .modal-overlay.active{ display:flex }
+    .modal{ width:min(720px,95%); background:var(--card); border-radius:12px; padding:18px; border:1px solid var(--border) }
+    /* Responsive */
+    @media (max-width: 900px){
+      .sidebar{ display:none }
+      .drawer-hidden, .drawer-visible { width:calc(var(--sidebar-width)); box-shadow: 12px 0 30px rgba(0,0,0,0.45) }
+      .top-actions { gap:8px }
+      .stat-card { min-width:110px; padding:8px }
+      .meal-row img{ width:100px; height:64px }
+      .meal-row{ height:84px; min-height:84px }
+      .main { padding:12px }
+      /* Show hamburger on mobile */
+      #hamburgerBtn { display: flex !important; }
+    }
+    @media (max-width:480px){
+      .stat-card{ min-width:84px; padding:8px; font-size:13px }
+      .logo span{ display:none }
+      .logo .logo-icon{ font-size:18px }
+      .meal-row img{ width:88px; height:56px }
+      .meal-row{ height:80px }
+    }
+    /* Hide hamburger on desktop */
+    @media (min-width: 901px) {
+      #hamburgerBtn { display: none !important; }
+    }
+
+    @media (max-width: 768px) {
+  .date-input {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    padding: 6px 8px;
+    border-radius: 8px;
+  }
+  
+  .date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: 0.7;
+  }
+}
+    /* small helpers */
+    .muted{ color:var(--muted); font-size:13px }
+    .section-header{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:12px; flex-wrap:wrap }
+    .search-input{ padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text) }
+    .filter-select{ padding:8px 10px; border-radius:8px; border:1px solid var(--border); background:transparent; color:var(--text) }
+    /* Toast notification */
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--card);
+      color: var(--text);
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      box-shadow: 0 4px 12px var(--overlay);
+      z-index: 300;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.3s, transform 0.3s;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .toast.success { border-left: 3px solid var(--accent); }
+    .toast.error { border-left: 3px solid #ef4444; }
+    /* Fixed chart containers */
+    .chart-container {
+      background: var(--card);
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: 10px;
+      height: 200px;
+      display: flex;
+      flex-direction: column;
+    }
+    .chart-container h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+    }
+    .chart-container canvas {
+      flex: 1;
+      min-height: 0;
+    }
+    /* Order status styling */
     .order-status {
       display: inline-block;
-      padding: 6px 14px;
-      border-radius: 30px;
-      font-size: 14px;
-      font-weight: 600;
-      text-transform: capitalize;
-    }
-    .status-pending { background: rgba(234, 179, 8, 0.2); color: #f59e0b; }
-    .status-completed { background: rgba(34, 197, 94, 0.2); color: #22c55e; }
-    .status-cancelled { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-    .order-actions {
-      display: flex;
-      gap: 12px;
-      margin-top: 16px;
-      flex-wrap: wrap;
-    }
-    /* Meals */
-    .meals-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 24px;
-    }
-    .meal-card {
-      background: var(--card);
-      border-radius: 18px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-      backdrop-filter: blur(10px);
-      background: rgba(22, 27, 30, 0.6);
-      transition: var(--transition);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .meal-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    }
-    .meal-card.unavailable {
-      opacity: 0.6;
-      position: relative;
-    }
-    .unavailable-badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      background: rgba(239, 68, 68, 0.8);
-      color: white;
       padding: 4px 12px;
       border-radius: 20px;
       font-size: 12px;
       font-weight: 600;
-      z-index: 10;
+      text-transform: capitalize;
     }
-    .meal-image {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
+    .status-pending { 
+      background: rgba(234, 179, 8, 0.2); 
+      color: #f59e0b; 
+      border: 1px solid rgba(245, 158, 11, 0.3);
     }
-    .meal-info {
-      padding: 20px;
+    .status-completed { 
+      background: rgba(34, 197, 94, 0.2); 
+      color: #22c55e; 
+      border: 1px solid rgba(34, 197, 94, 0.3);
     }
-    .meal-name {
-      font-weight: 700;
-      margin-bottom: 10px;
-      font-size: 18px;
+    .status-cancelled { 
+      background: rgba(239, 68, 68, 0.2); 
+      color: #ef4444; 
+      border: 1px solid rgba(239, 68, 68, 0.3);
     }
-    .meal-category {
-      color: var(--muted);
-      font-size: 14px;
-      margin-bottom: 12px;
-    }
-    .meal-price {
-      color: var(--accent);
-      font-weight: 700;
-      margin-bottom: 16px;
-      font-size: 20px;
-    }
-    .meal-actions {
-      display: flex;
-      gap: 12px;
-    }
-    /* Analytics */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 24px;
-      margin-bottom: 32px;
-    }
-    .stat-card {
-      background: var(--card);
-      border-radius: 18px;
-      padding: 28px;
-      border: 1px solid var(--border);
-      text-align: center;
-      backdrop-filter: blur(10px);
-      background: rgba(22, 27, 30, 0.6);
-      transition: var(--transition);
-    }
-    .stat-card:hover {
-      border-color: var(--accent);
-      transform: translateY(-4px);
-    }
-    .stat-number {
-      font-size: 32px;
-      font-weight: 700;
-      color: var(--accent);
-      margin: 12px 0;
-    }
-    .chart-container {
-      background: var(--card);
-      border-radius: 18px;
-      padding: 28px;
-      border: 1px solid var(--border);
-      margin-top: 24px;
-      backdrop-filter: blur(10px);
-      background: rgba(22, 27, 30, 0.6);
-    }
-    canvas {
-      width: 100%;
-      height: 320px;
-    }
-    /* Mobile Bottom Navigation - ONLY visible on small screens */
-    .mobile-nav {
-      display: none;
-    }
-    @media (max-width: 768px) {
-      .mobile-nav {
-        display: flex;
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: var(--card);
-        border-top: 1px solid var(--border);
-        justify-content: space-around;
-        padding: 12px 0;
-        z-index: 1000;
-        backdrop-filter: blur(10px);
-        background: rgba(22, 27, 30, 0.95);
-        box-shadow: 0 -4px 16px var(--shadow);
-      }
-      .mobile-nav .nav-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 4px;
-        background: none;
-        border: none;
-        color: var(--muted);
-        font-size: 11px;
-        font-weight: 600;
-        cursor: pointer;
-        padding: 8px 0;
-        border-radius: 10px;
-        width: 25%;
-        min-height: 56px;
-        transition: var(--transition);
-      }
-      .mobile-nav .nav-item:hover,
-      .mobile-nav .nav-item.active {
-        color: var(--accent);
-        background: rgba(16, 185, 129, 0.1);
-      }
-      .mobile-nav .nav-icon {
-        font-size: 20px;
-      }
-      .main-content {
-        padding-bottom: 90px;
-      }
-      .sidebar {
-        display: none !important;
-      }
-      .main-content {
-        margin-left: 0 !important;
-        margin-top: var(--topbar-height) !important;
-      }
-    }
-    /* Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: var(--overlay);
-      backdrop-filter: blur(10px);
-      display: none;
-      z-index: 1000;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .modal-overlay.active {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      opacity: 1;
-    }
-    .modal {
-      background: var(--card);
-      border-radius: 20px;
-      width: 95%;
-      max-width: 600px;
-      max-height: 90vh;
-      overflow-y: auto;
-      transform: translateY(20px);
-      opacity: 0;
-      transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
-      backdrop-filter: blur(10px);
-      background: rgba(22, 27, 30, 0.9);
-      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-    }
-    .modal-overlay.active .modal {
-      transform: translateY(0);
-      opacity: 1;
-    }
-    .modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 24px 28px 20px;
-      border-bottom: 1px solid var(--border);
-    }
-    .close-modal {
-      background: none;
-      border: none;
-      color: var(--text);
-      font-size: 28px;
-      cursor: pointer;
-      width: 44px;
-      height: 44px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .close-modal:hover {
-      background: var(--border);
-    }
-    .modal-body {
-      padding: 28px;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    .form-label {
-      display: block;
-      margin-bottom: 10px;
-      color: var(--muted);
-      font-weight: 600;
-      font-size: 15px;
-    }
-    .form-input, .form-select, .form-textarea {
-      width: 100%;
-      padding: 14px 16px;
-      border-radius: 14px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 16px;
-    }
-    .form-input:focus, .form-select:focus, .form-textarea:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
-    }
-    .form-textarea {
-      min-height: 120px;
-      resize: vertical;
-    }
-    /* Order Details Table */
-    .order-items-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 16px 0;
-    }
-    .order-items-table th,
-    .order-items-table td {
-      padding: 12px 15px;
-      text-align: left;
-      border-bottom: 1px solid var(--border);
-    }
-    .order-items-table th {
-      background: rgba(16, 185, 129, 0.1);
-      color: var(--accent);
-      font-weight: 600;
-    }
-    .order-items-table tr:last-child td {
-      border-bottom: none;
-    }
-    /* Toast */
-    .toast {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      background: var(--card);
-      color: var(--text);
-      padding: 16px 24px;
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      box-shadow: 0 8px 24px var(--shadow);
-      z-index: 2000;
-      opacity: 0;
-      transition: transform 0.3s ease, opacity 0.3s ease;
-      backdrop-filter: blur(10px);
-      background: rgba(22, 27, 30, 0.9);
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      max-width: 350px;
-    }
-    .toast.show {
-      transform: translateY(0);
-      opacity: 1;
-    }
-    .toast.success { border-left: 4px solid var(--accent); }
-    .toast.error { border-left: 4px solid #ef4444; }
-    .toast.warning { border-left: 4px solid #f59e0b; }
-    .toast.info { border-left: 4px solid #3b82f6; }
-    .toast-icon {
-      font-size: 20px;
-    }
-    /* Loading Shimmer */
-    .shimmer {
-      background: linear-gradient(90deg, var(--card) 25%, rgba(255,255,255,0.1) 50%, var(--card) 75%);
-      background-size: 200% 100%;
-      animation: shimmer 1.5s infinite;
-    }
-    @keyframes shimmer {
-      0% { background-position: 200% 0; }
-      100% { background-position: -200% 0; }
-    }
-    /* Mobile Responsive */
-    @media (max-width: 992px) {
-      .sidebar {
-        width: 80px;
-        padding: 24px 0;
-      }
-      .nav-item span:not(.nav-icon) {
-        display: none;
-      }
-      .nav-item {
-        justify-content: center;
-        padding: 18px 0;
-        gap: 0;
-        border-radius: 50%;
-        margin-right: 0;
-      }
-      .summary-stats {
-        display: none;
-      }
-    }
-    @media (max-width: 768px) {
-      .top-bar {
-        padding: 0 16px;
-      }
-      .menu-toggle {
-        display: flex;
-      }
-      .section-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .stats-grid {
-        grid-template-columns: 1fr;
-      }
-      .meals-grid {
-        grid-template-columns: 1fr;
-      }
-      .orders-grid {
-        grid-template-columns: 1fr;
-      }
-      .toast {
-        left: 16px;
-        right: 16px;
-        bottom: 80px;
-        max-width: none;
-      }
-      .order-items-table {
-        font-size: 14px;
-      }
-      .order-items-table th,
-      .order-items-table td {
-        padding: 8px 10px;
-      }
-    }
-    @media (max-width: 480px) {
-      .top-bar {
-        height: 60px;
-      }
-      .logo {
-        font-size: 20px;
-      }
-      .stat-card {
-        padding: 20px;
-      }
-      .stat-number {
-        font-size: 28px;
-      }
-    }
-    .hidden {
-      display: none !important;
-    }
-    .confirm-modal {
-      text-align: center;
-    }
+    /* Confirm modal */
     .confirm-message {
       margin-bottom: 24px;
-      font-size: 18px;
+      font-size: 16px;
       line-height: 1.5;
     }
-    .confirm-buttons {
-      display: flex;
-      gap: 16px;
-      justify-content: center;
-    }
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: var(--muted);
-    }
-    .empty-icon {
-      font-size: 64px;
-      margin-bottom: 20px;
-      opacity: 0.5;
-    }
-    .search-container {
-      display: flex;
-      gap: 16px;
-      margin-bottom: 24px;
-      flex-wrap: wrap;
-    }
-    .search-input {
-      flex: 1;
-      min-width: 200px;
-      padding: 14px 20px;
-      border-radius: 14px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 16px;
-    }
-    .search-input:focus {
-      outline: none;
-      border-color: var(--accent);
-    }
-    .filter-select {
-      padding: 14px 20px;
-      border-radius: 14px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      color: var(--text);
-      font-size: 16px;
-      min-width: 180px;
-    }
   </style>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
 </head>
-<body data-theme="dark">
+<body>
   <!-- Top Bar -->
   <div class="top-bar">
     <div class="logo">
@@ -780,943 +338,782 @@
       <span>Admin</span>
     </div>
     <div class="top-actions">
-      <div class="summary-stats">
-        <div class="stat-item">
-          <span>Total Orders</span>
-          <span class="stat-value" id="totalOrders">0</span>
-        </div>
-        <div class="stat-item">
-          <span>Revenue</span>
-          <span class="stat-value" id="totalRevenue">₦0</span>
-        </div>
-        <div class="stat-item">
-          <span>Meals</span>
-          <span class="stat-value" id="totalMeals">0</span>
-        </div>
-      </div>
-      <button id="notificationsBtn" class="notifications-btn">🔔<span class="notification-badge" id="notificationBadge">0</span></button>
-      <button id="muteBtn" class="mute-btn">🔇</button>
-      <button id="themeToggle" class="theme-btn">☀️</button>
-      <button id="logoutBtn" class="logout-btn">🔒</button>
-      <button id="menuToggle" class="menu-toggle hidden">☰</button>
+      <button id="hamburgerBtn" title="Menu" class="btn">☰</button>
+      <button id="syncBtn" class="btn" title="Sync">🔄 Sync</button>
+      
+        <!-- Replace the existing date inputs and export button -->
+<div class="export-controls">
+  <div class="date-range">
+    <input type="date" id="startDate" class="date-input" placeholder="Start">
+    <span class="date-separator">→</span>
+    <input type="date" id="endDate" class="date-input" placeholder="End">
+  </div>
+  <button id="exportBtn" class="btn btn-primary export-btn">📥 Export</button>
+</div>
+
+      <button id="logoutBtn" class="btn" title="Logout">🔒</button>
     </div>
   </div>
-  <!-- Dashboard Layout -->
-  <div class="dashboard">
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-      <div class="nav-item active" data-section="orders">
-        <span class="nav-icon">🧾</span>
-        <span>Orders</span>
+  <div class="layout">
+    <!-- Sidebar (desktop) -->
+    <nav id="sidebar" class="sidebar" aria-label="Main navigation">
+      <div class="nav-item active" data-section="orders">🧾 <span>Orders</span></div>
+      <div class="nav-item" data-section="meals">🍔 <span>Meals</span></div>
+      <div class="nav-item" data-section="analytics">📊 <span>Analytics</span></div>
+      <hr style="border:none;border-top:1px solid var(--border);margin:10px 0" />
+      <div style="margin-top:auto">
+        <div style="font-size:12px;color:var(--muted)">Signed in as</div>
+        <div style="font-weight:700;margin-top:6px">Admin</div>
       </div>
-      <div class="nav-item" data-section="meals">
-        <span class="nav-icon">🍔</span>
-        <span>Meals</span>
+    </nav>
+    <!-- Mobile Drawer -->
+    <nav id="mobileDrawer" class="sidebar drawer-hidden" aria-hidden="true">
+      <div class="nav-item" data-section="orders">🧾 <span>Orders</span></div>
+      <div class="nav-item" data-section="meals">🍔 <span>Meals</span></div>
+      <div class="nav-item" data-section="analytics">📊 <span>Analytics</span></div>
+    </nav>
+    <!-- Main content -->
+    <main class="main" id="main">
+      <!-- Stats -->
+      <div class="stats" id="statsArea">
+        <div class="stat-card">
+          <div class="stat-title">Total Orders</div>
+          <div class="stat-number" id="totalOrders">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Revenue</div>
+          <div class="stat-number" id="totalRevenue">₦0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-title">Meals</div>
+          <div class="stat-number" id="totalMeals">0</div>
+        </div>
       </div>
-      <div class="nav-item" data-section="analytics">
-        <span class="nav-icon">📊</span>
-        <span>Analytics</span>
-      </div>
-    </div>
-    <!-- Main Content -->
-    <div class="main-content">
-      <!-- Orders Section -->
-      <div id="ordersSection" class="section active">
+      <!-- Orders section -->
+      <section id="ordersSection" class="section active">
         <div class="section-header">
-          <h2 class="section-title">
-            <span>🧾</span>
-            Recent Orders
-          </h2>
-          <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;">
-            <div class="search-container">
-              <input type="text" id="orderSearch" class="search-input" placeholder="Search orders...">
-              <select id="orderStatusFilter" class="filter-select">
-                <option value="all">All Statuses</option>
-                <option value="pending">Pending</option>
-                <option value="completed">Completed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-            <div class="search-container">
-              <input type="date" id="startDate" class="search-input" placeholder="Start Date">
-              <input type="date" id="endDate" class="search-input" placeholder="End Date">
-            </div>
-            <button id="syncBtn" class="btn btn-outline">🔄 Sync</button>
-            <button id="exportBtn" class="btn btn-outline">📥 Export</button>
+          <h2>Recent Orders</h2>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="orderSearch" class="search-input" placeholder="Search orders..." />
+            <select id="orderStatusFilter" class="filter-select">
+              <option value="all">All</option>
+              <option value="pending">Pending</option>
+              <option value="completed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
           </div>
         </div>
-        <div class="orders-grid" id="ordersGrid">
-          <!-- Orders will be populated here -->
-        </div>
-      </div>
-      <!-- Meals Section -->
-      <div id="mealsSection" class="section">
+        <div id="ordersGrid" style="display:flex;flex-direction:column;gap:10px"></div>
+      </section>
+      <!-- Meals section (list) -->
+      <section id="mealsSection" class="section">
         <div class="section-header">
-          <h2 class="section-title">
-            <span>🍔</span>
-            All Meals
-          </h2>
-          <div style="display:flex;gap:12px;flex-wrap:wrap;">
-            <div class="search-container">
-              <input type="text" id="mealSearch" class="search-input" placeholder="Search meals...">
-              <select id="mealCategoryFilter" class="filter-select">
-                <option value="all">All Categories</option>
-                <option value="Main Course">Main Course</option>
-                <option value="Fast Food">Fast Food</option>
-                <option value="Drinks & Beverages">Drinks & Beverages</option>
-                <option value="Snacks & Sides">Snacks & Sides</option>
-                <option value="Desserts">Desserts</option>
-              </select>
-            </div>
-            <button id="addMealBtn" class="btn btn-primary">+ Add Meal</button>
-          </div>
-        </div>
-        <div class="meals-grid" id="mealsGrid">
-          <!-- All meals (available + unavailable) will be populated here -->
-        </div>
-      </div>
-      <!-- Analytics Section -->
-      <div id="analyticsSection" class="section">
-        <div class="section-header">
-          <h2 class="section-title">
-            <span>📊</span>
-            Analytics Dashboard
-          </h2>
-        </div>
-        <div class="stats-grid">
-          <div class="stat-card">
-            <div>Today's Orders</div>
-            <div class="stat-number" id="todayOrders">0</div>
-          </div>
-          <div class="stat-card">
-            <div>Today's Revenue</div>
-            <div class="stat-number" id="todayRevenue">₦0</div>
-          </div>
-          <div class="stat-card">
-            <div>Average Order Value</div>
-            <div class="stat-number" id="avgOrder">₦0</div>
-          </div>
-          <div class="stat-card">
-            <div>Top Selling Meal</div>
-            <div class="stat-number" id="topMeal">-</div>
-          </div>
-        </div>
-        <div class="chart-container">
-          <h3>Orders per Day (Last 14 Days)</h3>
-          <canvas id="ordersChart"></canvas>
-        </div>
-        <div class="chart-container">
-          <h3>Revenue Growth</h3>
-          <canvas id="revenueChart"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- Order Details Modal -->
-  <div id="orderModal" class="modal-overlay">
-    <div class="modal">
-      <div class="modal-header">
-        <h3>Order Details</h3>
-        <button class="close-modal" id="closeOrderModal">×</button>
-      </div>
-      <div class="modal-body" id="orderDetails">
-        <!-- Order details will be populated here -->
-      </div>
-    </div>
-  </div>
-  <!-- Add/Edit Meal Modal -->
-  <div id="mealModal" class="modal-overlay">
-    <div class="modal">
-      <div class="modal-header">
-        <h3 id="mealModalTitle">Add New Meal</h3>
-        <button class="close-modal" id="closeMealModal">×</button>
-      </div>
-      <div class="modal-body">
-        <form id="mealForm">
-          <div class="form-group">
-            <label class="form-label">Meal Name</label>
-            <input
-              type="text"
-              id="mealName"
-              class="form-input"
-              placeholder="e.g., Jollof Rice with Chicken"
-              required
-            >
-          </div>
-          <div class="form-group">
-            <label class="form-label">Description (Optional)</label>
-            <textarea
-              id="mealDescription"
-              class="form-textarea"
-              placeholder="Describe ingredients, spice level, or serving style..."
-            ></textarea>
-          </div>
-          <div class="form-group">
-            <label class="form-label">Price (₦)</label>
-            <input
-              type="number"
-              id="mealPrice"
-              class="form-input"
-              step="0.01"
-              min="0"
-              placeholder="0.00"
-              required
-            >
-          </div>
-          <div class="form-group">
-            <label class="form-label">Category</label>
-            <select id="mealCategory" class="form-input" required>
-              <option value="">Select Category</option>
+          <h2>All Meals</h2>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="mealSearch" class="search-input" placeholder="Search meals..." />
+            <select id="mealCategoryFilter" class="filter-select">
+              <option value="all">All Categories</option>
               <option value="Main Course">Main Course</option>
               <option value="Fast Food">Fast Food</option>
               <option value="Drinks & Beverages">Drinks & Beverages</option>
               <option value="Snacks & Sides">Snacks & Sides</option>
               <option value="Desserts">Desserts</option>
             </select>
+            <button id="addMealBtn" class="btn btn-primary">+ Add Meal</button>
           </div>
-          <div class="form-group">
-            <label class="form-label">Availability</label>
-            <div style="display:flex;align-items:center;gap:12px;">
-              <label class="toggle-switch">
-                <input type="checkbox" id="mealAvailable" checked>
-                <span class="slider"></span>
-              </label>
-              <span id="availabilityStatus">Available</span>
-            </div>
+        </div>
+        <div id="mealsList" class="meals-list" aria-live="polite"></div>
+      </section>
+      <!-- Analytics -->
+      <section id="analyticsSection" class="section">
+        <div class="section-header">
+          <h2>Analytics</h2>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-bottom:14px">
+          <div class="stat-card"><div class="stat-title">Today's Orders</div><div class="stat-number" id="todayOrders">0</div></div>
+          <div class="stat-card"><div class="stat-title">Today's Revenue</div><div class="stat-number" id="todayRevenue">₦0</div></div>
+          <div class="stat-card"><div class="stat-title">Avg Order</div><div class="stat-number" id="avgOrder">₦0</div></div>
+          <div class="stat-card"><div class="stat-title">Top Meal</div><div class="stat-number" id="topMeal">-</div></div>
+        </div>
+        <div style="display:grid;gap:14px">
+          <div class="chart-container">
+            <h3>Orders per Day (14d)</h3>
+            <canvas id="ordersChart"></canvas>
           </div>
-          <div class="form-group">
-            <label class="form-label">Image</label>
-            <input
-              type="file"
-              id="mealImage"
-              class="form-input"
-              accept="image/*"
-            >
-            <div class="small" style="margin-top:8px;color:var(--muted);">
-              Recommended: JPG/PNG under 2MB
-            </div>
+          <div class="chart-container">
+            <h3>Revenue (14d)</h3>
+            <canvas id="revenueChart"></canvas>
           </div>
-          <div class="form-group">
-            <button type="submit" class="btn btn-primary" id="saveMealBtn">
-              Save Meal
-            </button>
-          </div>
-        </form>
+        </div>
+      </section>
+    </main>
+  </div>
+  <!-- Add/Edit Meal Modal -->
+  <div id="mealModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h3 id="mealModalTitle">Add Meal</h3>
+        <button id="closeMealModal" class="btn">×</button>
       </div>
+      <form id="mealForm">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <label>
+            <div class="muted">Meal name</div>
+            <input id="mealName" class="search-input" required />
+          </label>
+          <label>
+            <div class="muted">Description</div>
+            <input id="mealDescription" class="search-input" />
+          </label>
+          <div style="display:flex;gap:8px">
+            <label style="flex:1">
+              <div class="muted">Price (₦)</div>
+              <input id="mealPrice" type="number" step="0.01" min="0" class="search-input" required />
+            </label>
+            <label style="width:180px">
+              <div class="muted">Category</div>
+              <select id="mealCategory" class="filter-select" required>
+                <option value="">Select</option>
+                <option value="Main Course">Main Course</option>
+                <option value="Fast Food">Fast Food</option>
+                <option value="Drinks & Beverages">Drinks & Beverages</option>
+                <option value="Snacks & Sides">Snacks & Sides</option>
+                <option value="Desserts">Desserts</option>
+              </select>
+            </label>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <label style="display:flex;align-items:center;gap:8px">
+              <input type="checkbox" id="mealAvailable" checked /> <span class="muted">Available</span>
+            </label>
+            <label style="flex:1">
+              <div class="muted">Image</div>
+              <input id="mealImage" type="file" accept="image/*" />
+            </label>
+          </div>
+          <div style="display:flex;gap:8px;justify-content:flex-end">
+            <button type="button" id="cancelMealBtn" class="btn">Cancel</button>
+            <button type="submit" id="saveMealBtn" class="btn btn-primary">Save Meal</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- Order Details Modal -->
+  <div id="orderModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <h3>Order Details</h3>
+        <button id="closeOrderModal" class="btn">×</button>
+      </div>
+      <div id="orderDetails"></div>
     </div>
   </div>
   <!-- Confirm Modal -->
-  <div id="confirmModal" class="modal-overlay">
-    <div class="modal">
-      <div class="modal-body confirm-modal">
-        <div class="confirm-message" id="confirmMessage">Are you sure you want to perform this action?</div>
-        <div class="confirm-buttons">
-          <button id="confirmNo" class="btn btn-outline">Cancel</button>
-          <button id="confirmYes" class="btn btn-primary">Confirm</button>
-        </div>
+  <div id="confirmModal" class="modal-overlay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h3 id="confirmTitle">Confirm Action</h3>
+        <button id="closeConfirmModal" class="btn">×</button>
+      </div>
+      <div id="confirmMessage" style="margin-bottom:20px;line-height:1.5"></div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button id="confirmNo" class="btn">Cancel</button>
+        <button id="confirmYes" class="btn btn-primary">Confirm</button>
       </div>
     </div>
   </div>
   <!-- Toast Notification -->
   <div id="toast" class="toast">
-    <span class="toast-icon">ℹ️</span>
     <span id="toastMessage">Notification message</span>
   </div>
-  <!-- Mobile Bottom Navigation -->
-  <div class="mobile-nav" id="mobileNav">
-    <button id="btnOrders" class="nav-item active" data-section="orders">
-      <span class="nav-icon">🧾</span>
-      <span>Orders</span>
-    </button>
-    <button id="btnMeals" class="nav-item" data-section="meals">
-      <span class="nav-icon">🍔</span>
-      <span>Meals</span>
-    </button>
-    <button id="btnAnalytics" class="nav-item" data-section="analytics">
-      <span class="nav-icon">📊</span>
-      <span>Analytics</span>
-    </button>
-  </div>
-  <a href="/" class="back-link">← Back to Menu</a>
-<script>
-/* Supabase config */
-const SUPABASE_URL = "https://tbnjvmibyzeqmgnaavpc.supabase.co";
-const SUPABASE_KEY = "sb_publishable_GfSPdiJgIXfURhNDREfPEw_1uNQvT46";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-/* DOM Elements */
-const themeToggle = document.getElementById('themeToggle');
-const logoutBtn = document.getElementById('logoutBtn');
-const notificationsBtn = document.getElementById('notificationsBtn');
-const muteBtn = document.getElementById('muteBtn');
-const navItems = document.querySelectorAll('.nav-item');
-const sections = document.querySelectorAll('.section');
-const ordersGrid = document.getElementById('ordersGrid');
-const mealsGrid = document.getElementById('mealsGrid');
-const addMealBtn = document.getElementById('addMealBtn');
-const mealForm = document.getElementById('mealForm');
-const orderModal = document.getElementById('orderModal');
-const mealModal = document.getElementById('mealModal');
-const closeOrderModal = document.getElementById('closeOrderModal');
-const closeMealModal = document.getElementById('closeMealModal');
-const exportBtn = document.getElementById('exportBtn');
-const syncBtn = document.getElementById('syncBtn');
-const toast = document.getElementById('toast');
-const toastMessage = document.getElementById('toastMessage');
-const confirmModal = document.getElementById('confirmModal');
-const confirmMessage = document.getElementById('confirmMessage');
-const confirmYes = document.getElementById('confirmYes');
-const confirmNo = document.getElementById('confirmNo');
-const notificationBadge = document.getElementById('notificationBadge');
-const menuToggle = document.getElementById('menuToggle');
-const sidebar = document.getElementById('sidebar');
-
-/* Stats elements */
-const totalOrdersEl = document.getElementById('totalOrders');
-const totalRevenueEl = document.getElementById('totalRevenue');
-const totalMealsEl = document.getElementById('totalMeals');
-const todayOrdersEl = document.getElementById('todayOrders');
-const todayRevenueEl = document.getElementById('todayRevenue');
-const avgOrderEl = document.getElementById('avgOrder');
-const topMealEl = document.getElementById('topMeal');
-
-/* Search and filter elements */
-const orderSearch = document.getElementById('orderSearch');
-const orderStatusFilter = document.getElementById('orderStatusFilter');
-const mealSearch = document.getElementById('mealSearch');
-const mealCategoryFilter = document.getElementById('mealCategoryFilter');
-
-/* Meal form elements */
-const mealName = document.getElementById('mealName');
-const mealDescription = document.getElementById('mealDescription');
-const mealPrice = document.getElementById('mealPrice');
-const mealCategory = document.getElementById('mealCategory');
-const mealAvailable = document.getElementById('mealAvailable');
-const mealImage = document.getElementById('mealImage');
-const mealModalTitle = document.getElementById('mealModalTitle');
-const availabilityStatus = document.getElementById('availabilityStatus');
-const saveMealBtn = document.getElementById('saveMealBtn');
-
-/* State */
-let restaurants = [];
-let meals = [];
-let orders = [];
-let newOrderCount = 0;
-let confirmCallback = null;
-let currentMealId = null;
-let isMuted = false;
-
-/* Check auth */
-function checkAuth() {
-  const user = localStorage.getItem('admin_user');
-  if (!user) {
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js"></script>
+  <script>
+  const SUPABASE_URL = 'https://tbnjvmibyzeqmgnaavpc.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_GfSPdiJgIXfURhNDREfPEw_1uNQvT46';
+  const STORAGE_BUCKET = 'meal-images';
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  
+  // Check auth on page load
+  if (!localStorage.getItem('admin_logged_in')) {
     window.location.href = 'admin.html';
   }
-}
-
-/* Theme */
-function initTheme() {
-  const theme = localStorage.getItem('theme') || 'dark';
-  document.documentElement.setAttribute('data-theme', theme);
-  themeToggle.textContent = theme === 'light' ? '🌙' : '☀️';
-}
-
-/* Navigation */
-function setupNavigation() {
-  navItems.forEach(item => {
+  
+  const sidebar = document.getElementById('sidebar');
+  const mobileDrawer = document.getElementById('mobileDrawer');
+  const hamburgerBtn = document.getElementById('hamburgerBtn');
+  const navItems = document.querySelectorAll('.sidebar .nav-item, #mobileDrawer .nav-item');
+  const sections = document.querySelectorAll('.section');
+  const ordersGrid = document.getElementById('ordersGrid');
+  const mealsList = document.getElementById('mealsList');
+  const addMealBtn = document.getElementById('addMealBtn');
+  const mealModal = document.getElementById('mealModal');
+  const mealForm = document.getElementById('mealForm');
+  const closeMealModal = document.getElementById('closeMealModal');
+  const cancelMealBtn = document.getElementById('cancelMealBtn');
+  const saveMealBtn = document.getElementById('saveMealBtn');
+  const orderModal = document.getElementById('orderModal');
+  const closeOrderModal = document.getElementById('closeOrderModal');
+  const orderDetails = document.getElementById('orderDetails');
+  const mealCategoryFilter = document.getElementById('mealCategoryFilter');
+  const mealSearch = document.getElementById('mealSearch');
+  const orderSearch = document.getElementById('orderSearch');
+  const orderStatusFilter = document.getElementById('orderStatusFilter');
+  const syncBtn = document.getElementById('syncBtn');
+  const exportBtn = document.getElementById('exportBtn');
+  const logoutBtn = document.getElementById('logoutBtn');
+  const toast = document.getElementById('toast');
+  const toastMessage = document.getElementById('toastMessage');
+  const confirmModal = document.getElementById('confirmModal');
+  
+  const totalOrdersEl = document.getElementById('totalOrders');
+  const totalRevenueEl = document.getElementById('totalRevenue');
+  const totalMealsEl = document.getElementById('totalMeals');
+  const todayOrdersEl = document.getElementById('todayOrders');
+  const todayRevenueEl = document.getElementById('todayRevenue');
+  const avgOrderEl = document.getElementById('avgOrder');
+  const topMealEl = document.getElementById('topMeal');
+  
+  let meals = [];
+  let orders = [];
+  let currentMeal = null;
+  let drawerVisible = false;
+  let ordersChart = null, revenueChart = null;
+  
+  function openModal(el) { 
+    el.classList.add('active'); 
+    el.setAttribute('aria-hidden','false'); 
+    document.body.style.overflow='hidden'; 
+  }
+  
+  function closeModal(el) { 
+    el.classList.remove('active'); 
+    el.setAttribute('aria-hidden','true'); 
+    document.body.style.overflow=''; 
+  }
+  
+  function showToast(message, type = 'info') {
+    toastMessage.textContent = message;
+    toast.className = 'toast ' + type;
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 3000);
+  }
+  
+  function escapeHtml(s=''){ 
+    return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'<','>':'>','"':'&quot;',"'":"&#39;"}[c])); 
+  }
+  
+  // FIXED HAMBURGER FUNCTIONALITY - COMPLETE SOLUTION
+  function activateSection(name) {
+    sections.forEach(s => s.classList.remove('active'));
+    document.getElementById(`${name}Section`).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.toggle('active', item.dataset.section === name);
+    });
+    if (window.innerWidth <= 900) {
+      toggleDrawer(false);
+    }
+  }
+  
+  document.querySelectorAll('#sidebar .nav-item').forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
-      navItems.forEach(i => i.classList.remove('active'));
-      sections.forEach(s => s.classList.remove('active'));
-      item.classList.add('active');
       const section = item.dataset.section;
-      document.getElementById(`${section}Section`).classList.add('active');
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      activateSection(section);
     });
   });
-
-  menuToggle.addEventListener('click', () => {
-    sidebar.classList.toggle('active');
+  
+  document.querySelectorAll('#mobileDrawer .nav-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+      e.preventDefault();
+      const section = item.dataset.section;
+      activateSection(section);
+    });
   });
-
+  
+  hamburgerBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleDrawer();
+  });
+   
+  function toggleDrawer(force) {
+    drawerVisible = typeof force === 'boolean' ? force : !drawerVisible;
+    if (drawerVisible) {
+      mobileDrawer.classList.remove('drawer-hidden');
+      mobileDrawer.classList.add('drawer-visible');
+      mobileDrawer.setAttribute('aria-hidden', 'false');
+    } else {
+      mobileDrawer.classList.remove('drawer-visible');
+      mobileDrawer.classList.add('drawer-hidden');
+      mobileDrawer.setAttribute('aria-hidden', 'true');
+    }
+  }
+  
   document.addEventListener('click', (e) => {
-    if (window.innerWidth <= 768 && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
-      sidebar.classList.remove('active');
+    if (window.innerWidth <= 900 && drawerVisible) {
+      const clickedInsideDrawer = mobileDrawer.contains(e.target);
+      const clickedHamburger = hamburgerBtn.contains(e.target);
+      
+      if (!clickedInsideDrawer && !clickedHamburger) {
+        toggleDrawer(false);
+      }
     }
   });
-}
-
-/* Logout */
-logoutBtn.addEventListener('click', () => {
-  localStorage.removeItem('admin_user');
-  window.location.href = 'admin.html';
-});
-
-/* Notifications */
-notificationsBtn.addEventListener('click', () => {
-  navItems.forEach(i => i.classList.remove('active'));
-  sections.forEach(s => s.classList.remove('active'));
-  document.querySelector('.nav-item[data-section="orders"]').classList.add('active');
-  document.getElementById('ordersSection').classList.add('active');
-  newOrderCount = 0;
-  updateNotificationBadge();
-});
-
-function updateNotificationBadge() {
-  const pendingOrders = orders.filter(o => o.status === 'pending').length;
-  if (pendingOrders > 0) {
-    notificationBadge.textContent = pendingOrders > 9 ? '9+' : pendingOrders;
-    notificationBadge.style.display = 'flex';
-  } else {
-    notificationBadge.style.display = 'none';
+  
+  // Confirm modal functions
+  function showConfirm(title, message, callback, confirmText = 'Confirm') {
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMessage').textContent = message;
+    document.getElementById('confirmYes').textContent = confirmText;
+    
+    confirmModal.classList.add('active');
+    confirmModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    
+    window.confirmCallback = callback;
   }
-}
-
-/* Mute button */
-muteBtn.addEventListener('click', () => {
-  isMuted = !isMuted;
-  muteBtn.textContent = isMuted ? '🔈' : '🔇';
-  localStorage.setItem('isMuted', isMuted);
-});
-
-/* Toast */
-function showToast(message, type = 'info') {
-  toastMessage.textContent = message;
-  toast.className = 'toast ' + type;
-  toast.classList.add('show');
-  const iconMap = { success: '✅', error: '❌', warning: '⚠️', info: 'ℹ️' };
-  toast.querySelector('.toast-icon').textContent = iconMap[type] || 'ℹ️';
-  setTimeout(() => toast.classList.remove('show'), 3000);
-}
-
-/* Confirm Modal */
-function showConfirm(message, callback) {
-  confirmMessage.textContent = message;
-  confirmModal.classList.add('active');
-  confirmCallback = callback;
-}
-confirmYes.addEventListener('click', () => {
-  if (confirmCallback) confirmCallback();
-  confirmModal.classList.remove('active');
-  confirmCallback = null;
-});
-confirmNo.addEventListener('click', () => {
-  confirmModal.classList.remove('active');
-  confirmCallback = null;
-});
-confirmModal.addEventListener('click', (e) => {
-  if (e.target === confirmModal) {
+  
+  document.getElementById('closeConfirmModal').addEventListener('click', () => {
     confirmModal.classList.remove('active');
-    confirmCallback = null;
+    confirmModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    window.confirmCallback = null;
+  });
+  
+  document.getElementById('confirmYes').addEventListener('click', () => {
+    if (window.confirmCallback) {
+      window.confirmCallback();
+      window.confirmCallback = null;
+    }
+    confirmModal.classList.remove('active');
+    confirmModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  });
+  
+  document.getElementById('confirmNo').addEventListener('click', () => {
+    confirmModal.classList.remove('active');
+    confirmModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+    window.confirmCallback = null;
+  });
+  
+  confirmModal.addEventListener('click', (e) => {
+    if (e.target === confirmModal) {
+      confirmModal.classList.remove('active');
+      confirmModal.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+      window.confirmCallback = null;
+    }
+  });
+  
+  // Data fetching functions
+  function getCachedData(key, maxAge = 600000) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      if (!parsed.timestamp) return null;
+      if (Date.now() - parsed.timestamp > maxAge) { 
+        localStorage.removeItem(key); 
+        return null; 
+      }
+      return parsed.data;
+    } catch (e) { 
+      localStorage.removeItem(key); 
+      return null; 
+    }
   }
-});
-
-/* Fetch data with caching */
-function getCachedData(key, maxAge = 600000) {
-  const cached = localStorage.getItem(key);
-  if (!cached) return null;
-  const parsed = JSON.parse(cached);
-  if (Date.now() - parsed.timestamp > maxAge) {
-    localStorage.removeItem(key);
-    return null;
+  
+  function setCachedData(key, data) { 
+    localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() })); 
   }
-  return parsed.data;
-}
-function setCachedData(key, data) {
-  localStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
-}
-
-async function fetchRestaurants() {
-  try {
-    const cached = getCachedData('restaurants');
-    if (cached) {
-      restaurants = cached;
+  
+  async function fetchMeals(useCache = true) {
+    try {
+      if (useCache) {
+        const cached = getCachedData('admin_meals', 300000);
+        if (cached) { 
+          meals = cached; 
+          renderMealsList(); 
+          totalMealsEl.textContent = meals.length; 
+          return; 
+        }
+      }
+      const { data, error } = await supabase
+        .from('meals')
+        .select('id,name,description,price,category,image_url,archived,created_at')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      meals = (data || []).map(m => ({ 
+        ...m, 
+        archived: Boolean(m.archived), 
+        category: (m.category||'').trim() 
+      }));
+      setCachedData('admin_meals', meals);
+      totalMealsEl.textContent = meals.length;
+      renderMealsList();
+    } catch (err) {
+      console.error('fetchMeals error', err);
+      showToast('Failed to load meals', 'error');
+    }
+  }
+  
+  async function fetchOrders() {
+    try {
+      const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
+      if (error) throw error;
+      orders = data || [];
+      setCachedData('admin_orders', orders);
+      updateStats();
+      renderOrders();
+    } catch (err) {
+      console.error('fetchOrders', err);
+      showToast('Failed to load orders', 'error');
+    }
+  }
+  
+  function renderMealsList() {
+    const q = mealSearch.value.trim().toLowerCase();
+    const cat = mealCategoryFilter.value;
+    const filtered = meals.filter(m => {
+      if (cat !== 'all' && m.category.toLowerCase() !== cat.toLowerCase()) return false;
+      if (!q) return true;
+      return (m.name || '').toLowerCase().includes(q) || (m.description||'').toLowerCase().includes(q);
+    });
+    if (!filtered.length) {
+      mealsList.innerHTML = `<div class="muted">No meals found</div>`;
       return;
     }
-    const { data, error } = await supabase.from('restaurants').select('*');
-    if (error) throw error;
-    restaurants = data || [];
-    setCachedData('restaurants', restaurants);
-  } catch (err) {
-    console.error('Error fetching restaurants:', err);
-    showToast('Failed to load restaurants', 'error');
-  }
-}
-
-async function fetchMeals(useCache = true) {
-  try {
-    if (typeof window !== 'undefined' && window.BroadcastChannel) {
-      const channel = new BroadcastChannel('Admin');
-      channel.postMessage({ type: 'meals_updated' });
-      channel.close();
-    }
-    if (useCache) {
-      const cached = getCachedData('meals');
-      if (cached) {
-        meals = cached;
-        totalMealsEl.textContent = meals.length;
-        renderMeals();
-        return;
-      }
-    }
-    const { data, error } = await supabase
-      .from('meals')
-      .select('id,name,description,price,category,image_url,archived,created_at')
-      .order('created_at', { ascending: false });
-    if (error) throw error;
-    meals = (data || []).map(meal => ({
-      ...meal,
-      archived: Boolean(meal.archived),
-      category: meal.category ? meal.category.trim() : ''
-    }));
-    setCachedData('meals', meals);
-    totalMealsEl.textContent = meals.length;
-    renderMeals();
-  } catch (err) {
-    console.error('Error fetching meals:', err);
-    showToast('Failed to load meals', 'error');
-  }
-}
-
-async function fetchOrders() {
-  try {
-    const { data, error } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
-    if (error) throw error;
-    orders = data || [];
-    setCachedData('orders', orders);
-    updateStats();
-    renderOrders();
-    updateNotificationBadge();
-  } catch (err) {
-    console.error('Error fetching orders:', err);
-    showToast('Failed to load orders', 'error');
-  }
-}
-
-/* Render functions */
-function renderOrders() {
-  let filteredOrders = [...orders];
-  const searchTerm = orderSearch.value.toLowerCase().trim();
-  if (searchTerm) {
-    filteredOrders = filteredOrders.filter(order => 
-      (order.customer_name && order.customer_name.toLowerCase().includes(searchTerm)) ||
-      (order.id && order.id.toLowerCase().includes(searchTerm))
-    );
-  }
-  const statusFilter = orderStatusFilter.value;
-  if (statusFilter !== 'all') {
-    filteredOrders = filteredOrders.filter(order => order.status === statusFilter);
-  }
-  if (filteredOrders.length === 0) {
-    ordersGrid.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🧾</div>
-        <h3>No orders found</h3>
-        <p>Try adjusting your search or filter criteria</p>
-      </div>
-    `;
-    return;
-  }
-  ordersGrid.innerHTML = filteredOrders.map(order => `
-    <div class="order-card">
-      <div class="order-header">
-        <div class="order-customer">${order.customer_name || 'Anonymous'}</div>
-        <div class="order-type">${order.order_type}</div>
-      </div>
-      <div class="order-amount">₦${Number(order.total_amount || 0).toLocaleString()}</div>
-      <div class="order-status status-${order.status}">${order.status}</div>
-      <div class="order-actions">
-        <button class="btn btn-outline" onclick="viewOrderDetails('${order.id}')">View Details</button>
-        ${order.status === 'pending' ? `
-          <button class="btn btn-primary" onclick="updateOrderStatus('${order.id}', 'completed')">Complete</button>
-          <button class="btn btn-outline" onclick="updateOrderStatus('${order.id}', 'cancelled')">Cancel</button>
-        ` : ''}
-      </div>
-    </div>
-  `).join('');
-}
-
-// ✅ Render ALL meals (available + unavailable) in one list
-function renderMeals() {
-  // NO filtering by archived — show ALL meals
-  let filteredMeals = [...meals];
-
-  const searchTerm = mealSearch.value.toLowerCase().trim();
-  if (searchTerm) {
-    filteredMeals = filteredMeals.filter(meal => 
-      (meal.name && meal.name.toLowerCase().includes(searchTerm)) ||
-      (meal.description && meal.description.toLowerCase().includes(searchTerm))
-    );
-  }
-
-  const categoryFilter = mealCategoryFilter.value;
-  if (categoryFilter !== 'all') {
-    filteredMeals = filteredMeals.filter(meal => {
-      const mealCategory = meal.category ? meal.category.trim() : '';
-      const filterCategory = categoryFilter.trim();
-      return mealCategory.toLowerCase() === filterCategory.toLowerCase();
-    });
-  }
-
-  if (filteredMeals.length === 0) {
-    mealsGrid.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🍔</div>
-        <h3>No meals found</h3>
-        <p>Try adjusting your search or filter criteria</p>
-      </div>
-    `;
-    return;
-  }
-
-  mealsGrid.innerHTML = filteredMeals.map(meal => {
-    const isUnavailable = meal.archived;
-    return `
-      <div class="meal-card ${isUnavailable ? 'unavailable' : ''}">
-        ${isUnavailable ? '<div class="unavailable-badge">Unavailable</div>' : ''}
-        <img src="${meal.image_url || 'https://placehold.co/600x400?text=Meal'}" alt="${meal.name}" class="meal-image">
-        <div class="meal-info">
-          <div class="meal-name">${meal.name}</div>
-          <div class="meal-category">${meal.category || ''}</div>
-          <div class="meal-price">₦${Number(meal.price || 0).toLocaleString()}</div>
-          <div class="meal-actions">
-            <button class="btn btn-outline" onclick="editMeal('${meal.id}')">Edit</button>
-            <button class="btn btn-danger" onclick="deleteMeal('${meal.id}')">Delete</button>
+    mealsList.innerHTML = filtered.map(meal => {
+      const unavailableBadge = meal.archived ? `<div style="color:#fff;background:rgba(239,68,68,0.85);padding:4px 8px;border-radius:12px;font-size:12px">Unavailable</div>` : '';
+      return `
+        <div class="meal-row" data-id="${meal.id}">
+          <img src="${meal.image_url || 'https://placehold.co/600x400?text=Meal'}" alt="${escapeHtml(meal.name)}">
+          <div class="meal-body">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+              <div class="meal-name">${escapeHtml(meal.name)}</div>
+              <div style="display:flex;gap:8px;align-items:center">
+                <div class="meal-price">₦${Number(meal.price||0).toLocaleString()}</div>
+                ${unavailableBadge}
+              </div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px">
+              <div class="meal-desc">${escapeHtml(meal.description||'')}</div>
+              <div class="meal-actions">
+                <button class="btn" data-action="edit" data-id="${meal.id}">Edit</button>
+                <button class="btn btn-danger" data-action="delete" data-id="${meal.id}">Delete</button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    `;
-  }).join('');
-}
-
-/* Order functions */
-function viewOrderDetails(orderId) {
-  const order = orders.find(o => o.id === orderId);
-  if (!order) return;
-  let items = order.items;
-  if (typeof items === 'string') {
-    try {
-      items = JSON.parse(items);
-    } catch (e) {
-      console.error('Failed to parse items:', e);
-      items = [];
-    }
-  }
-  let itemsTable = '';
-  if (Array.isArray(items) && items.length > 0) {
-    itemsTable = `
-      <table class="order-items-table">
-        <thead>
-          <tr>
-            <th>Meal Name</th>
-            <th>Quantity</th>
-            <th>Unit Price (₦)</th>
-            <th>Total (₦)</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${items.map(item => `
-            <tr>
-              <td>${item.name || 'N/A'}</td>
-              <td>${item.quantity || 0}</td>
-              <td>${Number(item.unitPrice || 0).toLocaleString()}</td>
-              <td>${Number((item.unitPrice || 0) * (item.quantity || 0)).toLocaleString()}</td>
-            </tr>
-          `).join('')}
-        </tbody>
-      </table>
-    `;
-  } else {
-    itemsTable = '<p>No items found for this order.</p>';
-  }
-  document.getElementById('orderDetails').innerHTML = `
-    <div><strong>Order ID:</strong> ${order.id}</div>
-    <div><strong>Customer:</strong> ${order.customer_name || 'N/A'}</div>
-    <div><strong>Phone:</strong> ${order.phone || 'N/A'}</div>
-    <div><strong>Address:</strong> ${order.address || 'N/A'}</div>
-    <div><strong>Table:</strong> ${order.table_number || 'N/A'}</div>
-    <div><strong>Order Type:</strong> ${order.order_type}</div>
-    <div><strong>Payment Method:</strong> ${order.payment_method === 'transfer' ? 'Bank Transfer' : 'Cash/POS'}</div>
-    <div><strong>Status:</strong> <span class="order-status status-${order.status}">${order.status}</span></div>
-    <div><strong>Created At:</strong> ${new Date(order.created_at).toLocaleString()}</div>
-    <div style="margin-top:16px;"><strong>Order Items:</strong></div>
-    ${itemsTable}
-    <div style="margin-top:16px;"><strong>Total Amount:</strong> ₦${Number(order.total_amount || 0).toLocaleString()}</div>
-  `;
-  orderModal.classList.add('active');
-}
-closeOrderModal.addEventListener('click', () => {
-  orderModal.classList.remove('active');
-});
-orderModal.addEventListener('click', (e) => {
-  if (e.target === orderModal) orderModal.classList.remove('active');
-});
-
-async function updateOrderStatus(orderId, status) {
-  try {
-    const { error } = await supabase
-      .from('orders')
-      .update({ status })
-      .eq('id', orderId);
-    if (error) throw error;
-    const order = orders.find(o => o.id === orderId);
-    if (order) order.status = status;
-    renderOrders();
-    updateNotificationBadge();
-    showToast(`Order marked as ${status}`, 'success');
-  } catch (err) {
-    console.error('Error updating order:', err);
-    showToast('Failed to update order', 'error');
-  }
-}
-
-/* Meal functions */
-addMealBtn.addEventListener('click', () => {
-  currentMealId = null;
-  mealForm.reset();
-  mealAvailable.checked = true;
-  availabilityStatus.textContent = 'Available';
-  mealModalTitle.textContent = 'Add New Meal';
-  mealModal.classList.add('active');
-});
-closeMealModal.addEventListener('click', () => {
-  mealModal.classList.remove('active');
-});
-mealModal.addEventListener('click', (e) => {
-  if (e.target === mealModal) mealModal.classList.remove('active');
-});
-mealAvailable.addEventListener('change', () => {
-  availabilityStatus.textContent = mealAvailable.checked ? 'Available' : 'Unavailable';
-});
-
-async function compressImage(file) {
-  return new Promise((resolve) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    const img = new Image();
-    img.onload = () => {
-      const maxSize = 800;
-      let width = img.width;
-      let height = img.height;
-      if (width > height) {
-        if (width > maxSize) {
-          height *= maxSize / width;
-          width = maxSize;
-        }
-      } else {
-        if (height > maxSize) {
-          width *= maxSize / height;
-          height = maxSize;
-        }
-      }
-      canvas.width = width;
-      canvas.height = height;
-      ctx.drawImage(img, 0, 0, width, height);
-      canvas.toBlob(resolve, 'image/jpeg', 0.8);
-    };
-    img.src = URL.createObjectURL(file);
-  });
-}
-
-mealForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const name = mealName.value.trim();
-  const price = parseFloat(mealPrice.value);
-  const description = mealDescription.value.trim() || null;
-  const imageFile = mealImage.files[0];
-  const category = mealCategory.value;
-  const available = mealAvailable.checked;
-
-  if (!name) { showToast('Meal name is required', 'warning'); return; }
-  if (isNaN(price) || price < 0) { showToast('Enter a valid price', 'warning'); return; }
-  if (!category) { showToast('Select a category', 'warning'); return; }
-
-  saveMealBtn.disabled = true;
-  saveMealBtn.textContent = 'Saving...';
-
-  try {
-    let imageUrl = '';
-    if (imageFile) {
-      const compressedFile = await compressImage(imageFile);
-      const ext = (imageFile.name.split('.').pop() || 'jpg').toLowerCase();
-      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('meal-images')
-        .upload(fileName, compressedFile, { cacheControl: '3600', upsert: false });
-      if (uploadError) throw uploadError;
-      const { data: publicUrlData } = supabase.storage
-        .from('meal-images')
-        .getPublicUrl(fileName);
-      imageUrl = publicUrlData.publicUrl;
-    }
-
-    if (currentMealId) {
-      const { error: updateError } = await supabase
-        .from('meals')
-        .update({ name, description, price, category, image_url: imageUrl || undefined, archived: !available })
-        .eq('id', currentMealId);
-      if (updateError) throw updateError;
-      showToast('Meal updated successfully', 'success');
-    } else {
-      const { data: insertData, error: insertError } = await supabase
-        .from('meals')
-        .insert([{ name, description, price, category, image_url: imageUrl, archived: !available }]);
-      if (insertError) throw insertError;
-      showToast('Meal added successfully', 'success');
-    }
-
-    mealModal.classList.remove('active');
-    mealForm.reset();
-    localStorage.removeItem('meals');
-    await fetchMeals(false);
-  } catch (err) {
-    console.error('Error saving meal:', err);
-    showToast('Failed to save meal: ' + (err.message || 'Unknown error'), 'error');
-  } finally {
-    saveMealBtn.disabled = false;
-    saveMealBtn.textContent = 'Save Meal';
-  }
-});
-
-function editMeal(mealId) {
-  const meal = meals.find(m => m.id === mealId);
-  if (!meal) return;
-  currentMealId = mealId;
-  mealName.value = meal.name;
-  mealDescription.value = meal.description || '';
-  mealPrice.value = meal.price;
-  mealCategory.value = meal.category || '';
-  mealAvailable.checked = !meal.archived;
-  availabilityStatus.textContent = !meal.archived ? 'Available' : 'Unavailable';
-  mealModalTitle.textContent = 'Edit Meal';
-  mealModal.classList.add('active');
-}
-
-// ✅ Removed toggleMealAvailability function — no quick toggle
-
-async function deleteMeal(mealId) {
-  showConfirm(
-    'Are you sure you want to permanently delete this meal? This action cannot be undone.',
-    async () => {
-      try {
-        const { error } = await supabase
-          .from('meals')
-          .delete()
-          .eq('id', mealId);
-        if (error) throw error;
-        showToast('Meal deleted successfully', 'success');
-        localStorage.removeItem('meals');
-        fetchMeals(false);
-      } catch (err) {
-        console.error('Error deleting meal:', err);
-        showToast('Failed to delete meal: ' + (err.message || 'Unknown error'), 'error');
-      }
-    }
-  );
-}
-
-/* Stats and Analytics */
-function updateStats() {
-  const totalOrders = orders.length;
-  const totalRevenue = orders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const todayOrders = orders.filter(order => {
-    const orderDate = new Date(order.created_at);
-    orderDate.setHours(0, 0, 0, 0);
-    return orderDate.getTime() === today.getTime();
-  });
-  const todayRevenue = todayOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
-  const avgOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
-
-  const mealCounts = {};
-  orders.forEach(order => {
-    if (order.items && Array.isArray(order.items)) {
-      order.items.forEach(item => {
-        mealCounts[item.name] = (mealCounts[item.name] || 0) + item.quantity;
+      `;
+    }).join('');
+    
+    mealsList.querySelectorAll('[data-action]').forEach(btn=>{
+      btn.addEventListener('click', (e)=>{
+        const id = btn.dataset.id;
+        const action = btn.dataset.action;
+        if (action === 'edit') openEditMeal(id);
+        if (action === 'delete') confirmDeleteMeal(id);
       });
-    }
-  });
-  let topMeal = '-';
-  if (Object.keys(mealCounts).length > 0) {
-    topMeal = Object.entries(mealCounts)
-      .sort(([,a], [,b]) => b - a)[0][0];
+    });
   }
-
-  totalOrdersEl.textContent = totalOrders;
-  totalRevenueEl.textContent = `₦${totalRevenue.toLocaleString()}`;
-  todayOrdersEl.textContent = todayOrders.length;
-  todayRevenueEl.textContent = `₦${todayRevenue.toLocaleString()}`;
-  avgOrderEl.textContent = `₦${avgOrderValue.toLocaleString()}`;
-  topMealEl.textContent = topMeal;
-
-  if (document.getElementById('analyticsSection').classList.contains('active')) {
-    updateCharts();
+  
+  function renderOrders() {
+    const q = orderSearch.value.trim().toLowerCase();
+    const status = orderStatusFilter.value;
+    const filtered = orders.filter(o=>{
+      if (status !== 'all' && o.status !== status) return false;
+      if (!q) return true;
+      return (o.customer_name||'').toLowerCase().includes(q) || (o.id||'').toLowerCase().includes(q);
+    });
+    if (!filtered.length) {
+      ordersGrid.innerHTML = `<div class="muted">No orders found</div>`; 
+      return;
+    }
+    ordersGrid.innerHTML = filtered.map(o=>{
+      const statusClass = `status-${o.status}`;
+      
+      return `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:var(--card);border:1px solid var(--border)">
+          <div style="flex:1">
+            <div style="font-weight:700">${escapeHtml(o.customer_name || 'Anonymous')}</div>
+            <div class="muted">${new Date(o.created_at).toLocaleString()} • ${o.order_type || ''}</div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+            <div style="font-weight:800">₦${Number(o.total_amount||0).toLocaleString()}</div>
+            <div class="order-status ${statusClass}">${o.status}</div>
+            <div style="display:flex;gap:8px; margin-top: 8px;">
+              <button class="btn" data-action="view" data-id="${o.id}">View</button>
+              ${o.status === 'pending' ? `<button class="btn btn-primary" data-action="complete" data-id="${o.id}">Complete</button>` : ''}
+              ${o.status === 'pending' ? `<button class="btn btn-danger" data-action="cancel" data-id="${o.id}">Cancel</button>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    ordersGrid.querySelectorAll('[data-action]').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        const id = btn.dataset.id;
+        const action = btn.dataset.action;
+        if (action === 'view') viewOrderDetails(id);
+        if (action === 'complete') updateOrderStatus(id, 'completed');
+        if (action === 'cancel') updateOrderStatus(id, 'cancelled');
+      });
+    });
   }
-}
-
-function updateCharts() {
-  const ordersCtx = document.getElementById('ordersChart').getContext('2d');
-  const last14Days = Array.from({length: 14}, (_, i) => {
-    const date = new Date();
-    date.setDate(date.getDate() - i);
-    return date;
-  }).reverse();
-  const orderCounts = last14Days.map(date => {
-    const dateStr = date.toISOString().split('T')[0];
-    return orders.filter(order => order.created_at.startsWith(dateStr)).length;
-  });
-  const labels = last14Days.map(date => date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
-
-  if (window.ordersChart) window.ordersChart.destroy();
-  window.ordersChart = new Chart(ordersCtx, {
-    type: 'line',
-    data: { labels, datasets: [{ label: 'Orders per Day', data: orderCounts, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', tension: 0.4, fill: true }] },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: { beginAtZero: true, ticks: { color: 'var(--muted)' }, grid: { color: 'var(--border)' } },
-        x: { ticks: { color: 'var(--muted)' }, grid: { color: 'var(--border)' } }
+  
+  function openAddMeal() {
+    currentMeal = null;
+    mealForm.reset();
+    document.getElementById('mealAvailable').checked = true;
+    document.getElementById('mealModalTitle').textContent = 'Add Meal';
+    openModal(mealModal);
+  }
+  
+  async function openEditMeal(id) {
+    const meal = meals.find(m => String(m.id) === String(id));
+    if (!meal) return showToast('Meal not found', 'error');
+    currentMeal = id;
+    document.getElementById('mealModalTitle').textContent = 'Edit Meal';
+    document.getElementById('mealName').value = meal.name;
+    document.getElementById('mealDescription').value = meal.description || '';
+    document.getElementById('mealPrice').value = meal.price;
+    document.getElementById('mealCategory').value = meal.category || '';
+    document.getElementById('mealAvailable').checked = !meal.archived;
+    openModal(mealModal);
+  }
+  
+  async function uploadImageFile(file) {
+    if (!file) return null;
+    try {
+      const ext = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const fileName = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { data, error } = await supabase.storage.from(STORAGE_BUCKET).upload(fileName, file, { cacheControl: '3600', upsert: false });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from(STORAGE_BUCKET).getPublicUrl(fileName);
+      return urlData.publicUrl;
+    } catch (err) {
+      console.error('uploadImageFile', err);
+      throw err;
+    }
+  }
+  
+  mealForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    saveMealBtn.disabled = true;
+    saveMealBtn.textContent = 'Saving...';
+    try {
+      const name = document.getElementById('mealName').value.trim();
+      const description = document.getElementById('mealDescription').value.trim();
+      const price = parseFloat(document.getElementById('mealPrice').value) || 0;
+      const category = document.getElementById('mealCategory').value;
+      const available = document.getElementById('mealAvailable').checked;
+      const fileInput = document.getElementById('mealImage');
+      let imageUrl = '';
+      if (!name) { showToast('Name required'); return; }
+      if (!category) { showToast('Select category'); return; }
+      if (fileInput.files && fileInput.files[0]) {
+        try {
+          imageUrl = await uploadImageFile(fileInput.files[0]);
+        } catch (imgErr) {
+          console.warn('Image upload failed, continuing without image', imgErr);
+        }
       }
+      if (currentMeal) {
+        const updates = { name, description, price, category, archived: !available };
+        if (imageUrl) updates.image_url = imageUrl;
+        const { error } = await supabase.from('meals').update(updates).eq('id', currentMeal);
+        if (error) throw error;
+        showToast('Meal updated', 'success');
+      } else {
+        const { error } = await supabase.from('meals').insert([{ name, description, price, category, image_url: imageUrl, archived: !available }]);
+        if (error) throw error;
+        showToast('Meal added', 'success');
+      }
+      localStorage.removeItem('admin_meals');
+      await fetchMeals(false);
+      closeModal(mealModal);
+    } catch (err) {
+      console.error('save meal error', err);
+      showToast('Failed to save meal', 'error');
+    } finally {
+      saveMealBtn.disabled = false;
+      saveMealBtn.textContent = 'Save Meal';
     }
   });
-
-  const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-  const revenueData = last14Days.map(date => {
-    const dateStr = date.toISOString().split('T')[0];
-    return orders
-      .filter(order => order.created_at.startsWith(dateStr))
-      .reduce((sum, order) => sum + (order.total_amount || 0), 0);
-  });
-  if (window.revenueChart) window.revenueChart.destroy();
-  window.revenueChart = new Chart(revenueCtx, {
-    type: 'bar',
-    data: { labels, datasets: [{ label: 'Revenue (₦)', data: revenueData, backgroundColor: 'rgba(16, 185, 129, 0.6)', borderColor: '#10b981', borderWidth: 1 }] },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: {
-        y: {
-          beginAtZero: true,
-          ticks: { color: 'var(--muted)', callback: v => '₦' + v.toLocaleString() },
-          grid: { color: 'var(--border)' }
-        },
-        x: { ticks: { color: 'var(--muted)' }, grid: { color: 'var(--border)' } }
-      }
+  
+  cancelMealBtn.addEventListener('click', () => closeModal(mealModal));
+  closeMealModal.addEventListener('click', () => closeModal(mealModal));
+  addMealBtn.addEventListener('click', openAddMeal);
+  
+  function confirmDeleteMeal(id) {
+    showConfirm(
+      'Delete Meal',
+      'Are you sure you want to permanently delete this meal? This action cannot be undone.',
+      () => deleteMeal(id),
+      'Delete'
+    );
+  }
+  
+  async function deleteMeal(id) {
+    try {
+      const { error } = await supabase.from('meals').delete().eq('id', id);
+      if (error) throw error;
+      showToast('Meal deleted', 'success');
+      localStorage.removeItem('admin_meals');
+      await fetchMeals(false);
+    } catch (err) {
+      console.error('deleteMeal', err);
+      showToast('Failed to delete meal', 'error');
     }
+  }
+  
+  function viewOrderDetails(id) {
+    const order = orders.find(o => String(o.id) === String(id));
+    if (!order) return showToast('Order not found', 'error');
+    let items = order.items;
+    if (typeof items === 'string') {
+      try { items = JSON.parse(items); } catch (e) { items = []; }
+    }
+    orderDetails.innerHTML = `
+      <div><strong>Order ID:</strong> ${order.id}</div>
+      <div><strong>Customer:</strong> ${escapeHtml(order.customer_name || 'N/A')}</div>
+      <div><strong>Type:</strong> ${escapeHtml(order.order_type || '')}</div>
+      <div><strong>Payment:</strong> ${order.payment_method === 'transfer' ? 'Bank Transfer' : 'Cash/POS'}</div>
+      <div style="margin-top:8px"><strong>Items:</strong></div>
+      ${Array.isArray(items) && items.length ? '<ul>' + items.map(it => `<li>${escapeHtml(it.name)} x${it.quantity} - ₦${(it.unitPrice||0).toLocaleString()}</li>`).join('') + '</ul>' : '<div class="muted">No items</div>'}
+      <div style="margin-top:8px"><strong>Total:</strong> ₦${Number(order.total_amount||0).toLocaleString()}</div>
+    `;
+    openModal(orderModal);
+  }
+  
+  closeOrderModal.addEventListener('click', ()=>closeModal(orderModal));
+  orderModal.addEventListener('click', (e)=>{ if (e.target === orderModal) closeModal(orderModal); });
+  
+  async function updateOrderStatus(orderId, status) {
+    try {
+      const { error } = await supabase.from('orders').update({ status }).eq('id', orderId);
+      if (error) throw error;
+      const o = orders.find(x => String(x.id) === String(orderId));
+      if (o) o.status = status;
+      renderOrders();
+      updateStats();
+      showToast(`Order marked as ${status}`, 'success');
+    } catch (err) {
+      console.error('updateOrderStatus', err);
+      showToast('Failed to update order', 'error');
+    }
+  }
+  
+  function updateStats() {
+    const totalOrders = orders.length;
+    const totalRevenue = orders.reduce((s,o)=> s + (o.total_amount||0), 0);
+    const today = new Date(); today.setHours(0,0,0,0);
+    const todayOrders = orders.filter(o => {
+      const d = new Date(o.created_at); d.setHours(0,0,0,0); return d.getTime() === today.getTime();
+    });
+    const todayRevenue = todayOrders.reduce((s,o)=> s + (o.total_amount||0), 0);
+    const avgOrder = totalOrders ? Math.round(totalRevenue/totalOrders) : 0;
+    const counts = {};
+    orders.forEach(o=>{
+      let items = o.items;
+      if (typeof items === 'string') {
+        try{ items = JSON.parse(items); } catch(e){ items = []; }
+      }
+      if (Array.isArray(items)) items.forEach(it => { counts[it.name] = (counts[it.name]||0) + (it.quantity||0) });
+    });
+    const topMeal = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0]?.[0] || '-';
+    totalOrdersEl.textContent = totalOrders;
+    totalRevenueEl.textContent = `₦${totalRevenue.toLocaleString()}`;
+    totalMealsEl.textContent = meals.length;
+    todayOrdersEl.textContent = todayOrders.length;
+    todayRevenueEl.textContent = `₦${todayRevenue.toLocaleString()}`;
+    avgOrderEl.textContent = `₦${avgOrder.toLocaleString()}`;
+    topMealEl.textContent = topMeal;
+    renderCharts();
+  }
+  
+  function renderCharts() {
+    const last14 = Array.from({length:14},(_,i)=> {
+      const d = new Date(); d.setDate(d.getDate() - (13 - i)); d.setHours(0,0,0,0); return d;
+    });
+    const labels = last14.map(d => d.toLocaleDateString());
+    const orderCounts = last14.map(d => orders.filter(o => (new Date(o.created_at)).toDateString() === d.toDateString()).length);
+    const revenueData = last14.map(d => orders.filter(o => (new Date(o.created_at)).toDateString() === d.toDateString()).reduce((s,o)=> s + (o.total_amount||0), 0));
+    
+    const ordersCtx = document.getElementById('ordersChart').getContext('2d');
+    if (ordersChart) ordersChart.destroy();
+    ordersChart = new Chart(ordersCtx, {
+      type: 'line',
+      data: { labels, datasets: [{ label: 'Orders', data: orderCounts, borderColor: '#f37100', tension:0.3, fill: false }] },
+      options: { 
+        responsive: true, 
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { color: 'var(--muted)' }, grid: { color: 'var(--border)' } },
+          x: { ticks: { color: 'var(--muted)' }, grid: { color: 'var(--border)' } }
+        }
+      }
+    });
+    
+    const revCtx = document.getElementById('revenueChart').getContext('2d');
+    if (revenueChart) revenueChart.destroy();
+    revenueChart = new Chart(revCtx, {
+      type: 'bar',
+      data: { labels, datasets: [{ label:'Revenue', data: revenueData, backgroundColor: 'rgba(243,113,0,0.6)', borderColor: '#f37100', borderWidth: 1 }] },
+      options: { 
+        responsive: true, 
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, ticks: { color: 'var(--muted)', callback: v => '₦' + v.toLocaleString() }, grid: { color: 'var(--border)' } },
+          x: { ticks: { color: 'var(--muted)' }, grid: { color: 'var(--border)' } }
+        }
+      }
+    });
+  }
+  
+  function setupRealtime() {
+    supabase
+      .channel('admin-meals')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'meals' }, payload => {
+        localStorage.removeItem('admin_meals');
+        fetchMeals(false);
+      })
+      .subscribe();
+    supabase
+      .channel('admin-orders')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, payload => {
+        localStorage.removeItem('admin_orders');
+        fetchOrders();
+      })
+      .subscribe();
+  }
+  
+  syncBtn.addEventListener('click', async ()=>{
+    await Promise.all([fetchMeals(false), fetchOrders()]);
+    showToast('Data synced successfully', 'success');
   });
-}
-
-/* Export */
-exportBtn.addEventListener('click', () => {
+  
+  exportBtn.addEventListener('click', () => {
   const startDate = document.getElementById('startDate').value;
   const endDate = document.getElementById('endDate').value;
-  let filteredOrders = orders.filter(order => order.status === 'completed');
+  
+  // Get ALL orders (completed + cancelled) within date range
+  let filteredOrders = orders.filter(order => 
+    order.status === 'completed' || order.status === 'cancelled'
+  );
+  
   if (startDate && endDate) {
     const start = new Date(startDate);
     const end = new Date(endDate);
     end.setHours(23, 59, 59, 999);
+    
     filteredOrders = filteredOrders.filter(order => {
       const orderDate = new Date(order.created_at);
       return orderDate >= start && orderDate <= end;
@@ -1725,18 +1122,23 @@ exportBtn.addEventListener('click', () => {
     showToast('Please select both start and end dates', 'warning');
     return;
   }
+  
   if (filteredOrders.length === 0) {
-    showToast('No completed orders to export in selected date range', 'warning');
+    showToast('No completed or cancelled orders found in selected date range', 'warning');
     return;
   }
+  
   try {
+    // Create worksheet data with all order details
     const ws_data = [
-      ['ADMIN COMPLETED ORDERS REPORT'],
+      ['ADMIN ORDERS REPORT'],
       [`Exported: ${new Date().toLocaleString()}`],
-      startDate && endDate ? [`Date Range: ${startDate} to ${endDate}`] : [],
+      startDate && endDate ? [`Date Range: ${startDate} to ${endDate}`] : ['All Time'],
       [],
       ['Order ID', 'Customer Name', 'Order Type', 'Payment Method', 'Total Amount (₦)', 'Status', 'Order Date']
-    ].filter(row => row.length > 0);
+    ];
+    
+    // Add all filtered orders (completed + cancelled)
     filteredOrders.forEach(order => {
       ws_data.push([
         order.id,
@@ -1744,114 +1146,95 @@ exportBtn.addEventListener('click', () => {
         order.order_type,
         order.payment_method === 'transfer' ? 'Bank Transfer' : 'Cash/POS',
         order.total_amount,
-        'Completed',
+        order.status.charAt(0).toUpperCase() + order.status.slice(1), // Capitalize status
         new Date(order.created_at).toLocaleDateString('en-GB')
       ]);
     });
-    const totalOrders = filteredOrders.length;
-    const totalRevenue = filteredOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
-    ws_data.push([], ['Summary'], ['Completed Orders', totalOrders], ['Total Revenue (₦)', totalRevenue]);
-
+    
+    // Calculate totals (ONLY for completed orders)
+    const completedOrders = filteredOrders.filter(o => o.status === 'completed');
+    const totalCompletedOrders = completedOrders.length;
+    const totalCompletedRevenue = completedOrders.reduce((sum, order) => sum + (order.total_amount || 0), 0);
+    
+    // Add summary section
+    ws_data.push(
+      [],
+      ['SUMMARY'],
+      ['Total Orders (Completed + Cancelled)', filteredOrders.length],
+      ['Completed Orders Only', totalCompletedOrders],
+      ['Total Revenue (Completed Only)', totalCompletedRevenue]
+    );
+    
+    // Create and export workbook
     const ws = XLSX.utils.aoa_to_sheet(ws_data);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Completed Orders');
-
+    XLSX.utils.book_append_sheet(wb, ws, 'Orders Report');
+    
+    // Format currency columns
     const range = XLSX.utils.decode_range(ws['!ref']);
-    for (let R = 4; R <= range.e.r; ++R) {
-      const cell = ws[XLSX.utils.encode_cell({r: R, c: 4})];
+    for (let R = 4; R <= range.e.r; R++) {
+      const cell = ws[XLSX.utils.encode_cell({r: R, c: 4})]; // Total Amount column
       if (cell && typeof cell.v === 'number') {
         cell.z = '₦#,##0.00';
       }
     }
-
+    
+    // Auto-size columns
     const colWidths = [];
-    ws_data[3].forEach((header, i) => {
+    ws_data[4].forEach((header, i) => {
       colWidths.push({ wch: Math.max(header.toString().length + 2, 15) });
     });
     ws['!cols'] = colWidths;
-
-    XLSX.writeFile(wb, `Admin-completed-orders-${new Date().toISOString().split('T')[0]}.xlsx`);
-    showToast('Completed orders exported successfully', 'success');
+    
+    // Generate filename with dates
+    const filename = startDate && endDate 
+      ? `orders-report-${startDate}-to-${endDate}.xlsx`
+      : `orders-report-${new Date().toISOString().split('T')[0]}.xlsx`;
+    
+    XLSX.writeFile(wb, filename);
+    showToast('Orders exported successfully!', 'success');
+    
   } catch (err) {
     console.error('Export error:', err);
     showToast('Export failed: ' + (err.message || 'Unknown error'), 'error');
   }
 });
 
-/* Sync button */
-syncBtn.addEventListener('click', () => {
-  fetchOrders();
-  fetchMeals();
-  showToast('Data synced successfully', 'success');
-});
-
-/* Realtime subscription */
-function setupRealtime() {
-  supabase
-    .channel('meals-channel')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'meals' }, payload => {
-      localStorage.removeItem('meals');
-      fetchMeals(false);
-      if (payload.eventType === 'INSERT') {
-        showToast('A new meal was added — menu updated', 'info');
-      } else if (payload.eventType === 'UPDATE') {
-        showToast('Meal updated — menu refreshed', 'info');
-      } else if (payload.eventType === 'DELETE') {
-        showToast('Meal removed — menu refreshed', 'info');
-      }
-    })
-    .subscribe();
+function isValidDateRange(startDate, endDate) {
+  if (!startDate || !endDate) return false;
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  return start <= end;
 }
-
-/* Initialize */
-async function init() {
-  checkAuth();
-  initTheme();
-  setupNavigation();
-  await fetchRestaurants();
-  await fetchMeals();
-  await fetchOrders();
-  setupRealtime();
-
-  const savedMute = localStorage.getItem('isMuted');
-  if (savedMute !== null) {
-    isMuted = savedMute === 'true';
-    muteBtn.textContent = isMuted ? '🔈' : '🔇';
-  }
-
+  
+  logoutBtn.addEventListener('click', () => {
+    showConfirm(
+      'Logout',
+      'Are you sure you want to logout?',
+      () => {
+        localStorage.removeItem('admin_logged_in');
+        localStorage.removeItem('admin_user');
+        window.location.href = 'admin.html';
+      },
+      'Logout'
+    );
+  });
+  
+  mealSearch.addEventListener('input', renderMealsList);
+  mealCategoryFilter.addEventListener('change', renderMealsList);
   orderSearch.addEventListener('input', renderOrders);
   orderStatusFilter.addEventListener('change', renderOrders);
-  mealSearch.addEventListener('input', renderMeals);
-  mealCategoryFilter.addEventListener('change', renderMeals);
-}
-
-/* Theme toggle */
-themeToggle.addEventListener('click', () => {
-  const current = document.documentElement.getAttribute('data-theme');
-  const next = current === 'light' ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', next);
-  localStorage.setItem('theme', next);
-  themeToggle.textContent = next === 'light' ? '🌙' : '☀️';
-});
-
-// Mobile nav
-document.querySelectorAll('#mobileNav .nav-item').forEach(item => {
-  item.addEventListener('click', (e) => {
-    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    item.classList.add('active');
-    const section = item.dataset.section;
-    document.getElementById(`${section}Section`).classList.add('active');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  });
-});
-
-// Load Chart.js
-const script = document.createElement('script');
-script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
-script.onload = () => init();
-document.head.appendChild(script);
-</script>
+  
+  async function init() {
+    await Promise.all([fetchMeals(), fetchOrders()]);
+    setupRealtime();
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+  </script>
 </body>
 </html>
-
